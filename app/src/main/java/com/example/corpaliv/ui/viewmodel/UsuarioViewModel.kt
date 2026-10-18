@@ -2,6 +2,7 @@
 package com.example.corpaliv.ui.viewmodel
 
 import android.app.Application
+import android.util.Patterns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.corpaliv.data.UsuarioDataStore
@@ -13,7 +14,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class UsuarioViewModel(application: Application) : AndroidViewModel(application) {
+class UsuarioViewModel(
+    application: Application
+) : AndroidViewModel(application) {
 
     private val usuarioDataStore = UsuarioDataStore(application)
 
@@ -26,8 +29,8 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     init {
         viewModelScope.launch {
             usuarioDataStore.usuario.collect { usuario ->
-                _uiState.update {
-                    it.copy(
+                _uiState.update { estado ->
+                    estado.copy(
                         nombre = usuario.nombre,
                         correo = usuario.correo,
                         direccion = usuario.direccion
@@ -63,19 +66,32 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
         val nuevosErrores = UsuarioErrores(
             nombre = if (datos.nombre.isBlank()) {
                 "Introduce tu nombre completo."
-            } else null,
+            } else {
+                null
+            },
+
             correo = if (
                 datos.correo.isBlank() ||
-                !android.util.Patterns.EMAIL_ADDRESS.matcher(datos.correo.trim()).matches()
+                !Patterns.EMAIL_ADDRESS
+                    .matcher(datos.correo.trim())
+                    .matches()
             ) {
                 "Introduce un correo electrónico válido."
-            } else null,
+            } else {
+                null
+            },
+
             clave = if (datos.clave.length < 6) {
                 "La contraseña debe tener al menos 6 caracteres."
-            } else null,
+            } else {
+                null
+            },
+
             direccion = if (datos.direccion.isBlank()) {
                 "Introduce tu dirección."
-            } else null
+            } else {
+                null
+            }
         )
 
         _errores.value = nuevosErrores
@@ -104,7 +120,9 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
 
             if (!registrada) {
                 _errores.update {
-                    it.copy(correo = "Ya existe una cuenta con ese correo.")
+                    it.copy(
+                        correo = "Ya existe una cuenta con ese correo."
+                    )
                 }
             }
 
@@ -123,9 +141,12 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
         }
 
         viewModelScope.launch {
-            resultado(
-                usuarioDataStore.validarCredenciales(correo, clave)
+            val valido = usuarioDataStore.validarCredenciales(
+                correo,
+                clave
             )
+
+            resultado(valido)
         }
     }
 }

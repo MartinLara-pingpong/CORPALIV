@@ -8,9 +8,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.corpaliv.ui.screens.ColaboracionScreen
 import com.example.corpaliv.ui.screens.HomeScreen
+import com.example.corpaliv.ui.screens.InfoScreen
 import com.example.corpaliv.ui.screens.LoginScreen
 import com.example.corpaliv.ui.screens.RegistroScreen
 import com.example.corpaliv.ui.screens.ResumenScreen
+import com.example.corpaliv.ui.screens.SeccionContenido
 import com.example.corpaliv.ui.viewmodel.UsuarioViewModel
 
 @Composable
@@ -31,6 +33,9 @@ fun AppNavigation(navController: NavHostController) {
                 },
                 onColaborarClick = {
                     navController.navigate("colaboracion")
+                },
+                onSeccionClick = { seccion ->
+                    navController.navigate(seccion)
                 }
             )
         }
@@ -45,7 +50,6 @@ fun AppNavigation(navController: NavHostController) {
                 usuarioViewModel = usuarioViewModel
             )
         }
-
 
         composable("login") {
             LoginScreen(
@@ -64,7 +68,6 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-
         composable("resumen") {
             ResumenScreen(
                 usuarioViewModel = usuarioViewModel
@@ -76,6 +79,77 @@ fun AppNavigation(navController: NavHostController) {
                 onVolverClick = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable("institucion") {
+            InfoScreen(
+                contenido = SeccionContenido(
+                    titulo = "Quiénes somos",
+                    descripcion = "CORPALIV trabaja para promover la autonomía, " +
+                            "la participación y la inclusión social y laboral.",
+                    apartados = listOf(
+                        "Nuestra misión" to
+                                "Favorecer la inclusión y las oportunidades de " +
+                                "participación de las personas con discapacidad múltiple.",
+                        "Alba Lab" to
+                                "Una iniciativa vinculada a la formación, la producción " +
+                                "y la inclusión sociolaboral."
+                    )
+                ),
+                onVolverClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("programas") {
+            InfoScreen(
+                contenido = SeccionContenido(
+                    titulo = "Programas de inclusión",
+                    descripcion = "Conoce las áreas de trabajo de CORPALIV y Alba Lab.",
+                    apartados = listOf(
+                        "Formación" to
+                                "Desarrollo de habilidades y preparación para el empleo.",
+                        "Inclusión sociolaboral" to
+                                "Iniciativas que promueven la autonomía y la participación.",
+                        "Vinculación empresarial" to
+                                "Oportunidades de colaboración y responsabilidad social empresarial."
+                    )
+                ),
+                onVolverClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("catalogo") {
+            InfoScreen(
+                contenido = SeccionContenido(
+                    titulo = "Productos y servicios",
+                    descripcion = "Explora ejemplos de propuestas con impacto social.",
+                    apartados = listOf(
+                        "Productos elaborados en talleres" to
+                                "Ejemplo de catálogo para presentar productos vinculados " +
+                                "a iniciativas de inclusión.",
+                        "Servicios y alianzas" to
+                                "Espacio para mostrar propuestas de colaboración con empresas."
+                    )
+                ),
+                onVolverClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("historias") {
+            InfoScreen(
+                contenido = SeccionContenido(
+                    titulo = "Historias de impacto",
+                    descripcion = "La inclusión se construye mediante oportunidades " +
+                            "de participación y desarrollo.",
+                    apartados = listOf(
+                        "Una oportunidad para aprender" to
+                                "Historia ilustrativa ficticia sobre el desarrollo de habilidades.",
+                        "Colaboración que abre puertas" to
+                                "Ejemplo ficticio de una alianza que facilita nuevas oportunidades."
+                    )
+                ),
+                onVolverClick = { navController.popBackStack() }
             )
         }
     }
