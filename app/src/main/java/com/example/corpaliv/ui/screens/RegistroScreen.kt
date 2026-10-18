@@ -94,16 +94,20 @@ fun RegistroScreen(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+
             Button(
                 onClick = {
-                    if (usuarioViewModel.validarFormulario()) {
-                        onRegistroClick()
+                    usuarioViewModel.registrarCuenta { registrada ->
+                        if (registrada) {
+                            onRegistroClick()
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Registrarse")
             }
+
         }
     }
 }

@@ -8,11 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -23,40 +20,38 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HomeScreen(
     onRegistroClick: () -> Unit,
-    modifier: Modifier = Modifier
-    ) {
+    onLoginClick: () -> Unit,
+    onColaborarClick: () -> Unit
+) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             text = "CORPALIV",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary
+            style = MaterialTheme.typography.headlineLarge
         )
+
         Text(
             text = "Inclusión que transforma vidas",
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleMedium
         )
+
         Text(
-            text = "Conoce nuestra labor y descubre cómo puedes colaborar " +
-                    "para construir una sociedad más inclusiva."
+            text = "Conoce nuestra labor y descubre cómo puedes colaborar."
         )
 
         Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = "¿Quiénes somos?",
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.titleLarge
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -68,8 +63,8 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = "Promovemos la autonomía y la inclusión social " +
-                            "y laboral de personas con discapacidad."
+                    text = "Promovemos la autonomía y la inclusión " +
+                            "social y laboral de personas con discapacidad."
                 )
             }
         }
@@ -80,8 +75,8 @@ fun HomeScreen(
         )
 
         Text(
-            text = "Descubre nuestros programas, conoce nuestros productos " +
-                    "y encuentra oportunidades para colaborar con CORPALIV."
+            text = "Descubre nuestros programas, productos y " +
+                    "oportunidades para colaborar con CORPALIV."
         )
 
         Button(
@@ -92,7 +87,14 @@ fun HomeScreen(
         }
 
         OutlinedButton(
-            onClick = onRegistroClick,
+            onClick = onLoginClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Iniciar sesión")
+        }
+
+        OutlinedButton(
+            onClick = onColaborarClick,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Quiero colaborar")
