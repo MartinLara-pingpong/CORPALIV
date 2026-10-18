@@ -9,7 +9,6 @@ import com.example.corpaliv.model.SolicitudColaboracion
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.UUID
 
 private val Context.solicitudesDataStore by preferencesDataStore(
     name = "corpaliv_solicitudes"
@@ -25,9 +24,10 @@ class SolicitudDataStore(
         solicitud: SolicitudColaboracion
     ) {
         context.solicitudesDataStore.edit { preferencias ->
-            val solicitudesActuales = preferencias[solicitudesKey]
-                ?.let { JSONArray(it) }
-                ?: JSONArray()
+            val solicitudesActuales =
+                preferencias[solicitudesKey]?.let {
+                    JSONArray(it)
+                } ?: JSONArray()
 
             val nuevaSolicitud = JSONObject().apply {
                 put("id", solicitud.id)
@@ -39,6 +39,7 @@ class SolicitudDataStore(
                 put("aceptaContacto", solicitud.aceptaContacto)
                 put("disponibilidadRegular", solicitud.disponibilidadRegular)
                 put("recibirNovedades", solicitud.recibirNovedades)
+                put("rutaFotografia", solicitud.rutaFotografia)
             }
 
             solicitudesActuales.put(nuevaSolicitud)
@@ -48,7 +49,9 @@ class SolicitudDataStore(
 
     suspend fun obtenerSolicitudes(): List<SolicitudColaboracion> {
         val preferencias = context.solicitudesDataStore.data.first()
-        val contenido = preferencias[solicitudesKey] ?: return emptyList()
+        val contenido = preferencias[solicitudesKey]
+            ?: return emptyList()
+
         val json = JSONArray(contenido)
 
         return List(json.length()) { indice ->
@@ -63,7 +66,10 @@ class SolicitudDataStore(
                 motivo = elemento.getString("motivo"),
                 aceptaContacto = elemento.getBoolean("aceptaContacto"),
                 disponibilidadRegular = elemento.getBoolean("disponibilidadRegular"),
-                recibirNovedades = elemento.getBoolean("recibirNovedades")
+                recibirNovedades = elemento.getBoolean("recibirNovedades"),
+                rutaFotografia = elemento
+                    .optString("rutaFotografia", "")
+                    .takeIf { it.isNotBlank() && it != "null" }
             )
         }
     }

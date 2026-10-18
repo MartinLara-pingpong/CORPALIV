@@ -8,11 +8,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.corpaliv.data.UsuarioDataStore
 import com.example.corpaliv.model.UsuarioErrores
 import com.example.corpaliv.model.UsuarioUiState
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UsuarioViewModel(
     application: Application
@@ -111,22 +114,35 @@ class UsuarioViewModel(
         val datos = _uiState.value
 
         viewModelScope.launch {
-            val registrada = usuarioDataStore.registrarCuenta(
-                nombre = datos.nombre,
-                correo = datos.correo,
-                direccion = datos.direccion,
-                clave = datos.clave
-            )
-
-            if (!registrada) {
-                _errores.update {
-                    it.copy(
-                        correo = "Ya existe una cuenta con ese correo."
+            try {
+                val registrada = withContext(Dispatchers.IO) {
+                    usuarioDataStore.registrarCuenta(
+                        nombre = datos.nombre,
+                        correo = datos.correo,
+                        direccion = datos.direccion,
+                        clave = datos.clave
                     )
                 }
-            }
 
-            resultado(registrada)
+                if (!registrada) {
+                    _errores.update {
+                        it.copy(
+                            correo = "Ya existe una cuenta con ese correo."
+                        )
+                    }
+                }
+
+                resultado(registrada)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _errores.update {
+                    it.copy(
+                        correo = "No se pudo registrar la cuenta. Inténtalo de nuevo."
+                    )
+                }
+                resultado(false)
+            }
         }
     }
 
@@ -135,18 +151,30 @@ class UsuarioViewModel(
         clave: String,
         resultado: (Boolean) -> Unit
     ) {
-        if (correo.isBlank() || clave.isBlank()) {
+        if (
+            correo.isBlank() ||
+            !Patterns.EMAIL_ADDRESS.matcher(correo.trim()).matches() ||
+            clave.isBlank()
+        ) {
             resultado(false)
             return
         }
 
         viewModelScope.launch {
-            val valido = usuarioDataStore.validarCredenciales(
-                correo,
-                clave
-            )
+            try {
+                val valido = withContext(Dispatchers.IO) {
+                    usuarioDataStore.validarCredenciales(
+                        correo = correo,
+                        clave = clave
+                    )
+                }
 
-            resultado(valido)
+                resultado(valido)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                resultado(false)
+            }
         }
     }
 }

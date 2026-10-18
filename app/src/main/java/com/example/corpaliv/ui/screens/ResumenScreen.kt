@@ -44,26 +44,18 @@ private const val ARCHIVO_FOTO_PERFIL = "foto_perfil.jpg"
 
 @Composable
 fun ResumenScreen(
-    usuarioViewModel: UsuarioViewModel
+    usuarioViewModel: UsuarioViewModel,
+    onCerrarSesion: () -> Unit
 ) {
     val uiState by usuarioViewModel.uiState.collectAsState()
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var fotoPerfil by remember {
-        mutableStateOf<Bitmap?>(null)
-    }
+    var fotoPerfil by remember { mutableStateOf<Bitmap?>(null) }
+    var cargandoFoto by remember { mutableStateOf(true) }
+    var mensajeFoto by remember { mutableStateOf("") }
 
-    var cargandoFoto by remember {
-        mutableStateOf(true)
-    }
-
-    var mensajeFoto by remember {
-        mutableStateOf("")
-    }
-
-    // Recuperar la foto guardada en el almacenamiento interno.
     LaunchedEffect(Unit) {
         fotoPerfil = withContext(Dispatchers.IO) {
             cargarFoto(context)
@@ -71,7 +63,6 @@ fun ResumenScreen(
         cargandoFoto = false
     }
 
-    // Abrir la cámara del dispositivo.
     val camaraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
@@ -116,9 +107,7 @@ fun ResumenScreen(
         }
 
         Button(
-            onClick = {
-                camaraLauncher.launch(null)
-            },
+            onClick = { camaraLauncher.launch(null) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
@@ -162,6 +151,15 @@ fun ResumenScreen(
         Text(text = "Nombre: ${uiState.nombre}")
         Text(text = "Correo: ${uiState.correo}")
         Text(text = "Dirección: ${uiState.direccion}")
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = onCerrarSesion,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Cerrar sesión")
+        }
     }
 }
 

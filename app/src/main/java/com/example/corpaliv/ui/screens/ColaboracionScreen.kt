@@ -1,13 +1,14 @@
 
 package com.example.corpaliv.ui.screens
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -38,10 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.corpaliv.model.SolicitudColaboracion
+import com.example.corpaliv.ui.viewmodel.SolicitudErrores
 import com.example.corpaliv.ui.viewmodel.SolicitudViewModel
+import java.io.File
+import java.io.FileOutputStream
 import java.util.UUID
 
 @Composable
@@ -49,6 +54,8 @@ fun ColaboracionScreen(
     onVolverClick: () -> Unit,
     solicitudViewModel: SolicitudViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var edad by remember { mutableStateOf("") }
@@ -60,20 +67,36 @@ fun ColaboracionScreen(
     var recibirNovedades by remember { mutableStateOf(false) }
 
     var errores by remember {
-        mutableStateOf(
-            com.example.corpaliv.ui.viewmodel.SolicitudErrores()
-        )
+        mutableStateOf(SolicitudErrores())
     }
 
     var fotografia by remember { mutableStateOf<Bitmap?>(null) }
+    var errorFotografia by remember { mutableStateOf<String?>(null) }
 
     val uiState by solicitudViewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.mensaje) {
+        if (uiState.mensaje == "Solicitud guardada correctamente.") {
+            nombre = ""
+            correo = ""
+            edad = ""
+            fecha = ""
+            motivo = ""
+            aceptaContacto = false
+            disponibilidad = false
+            recibirNovedades = false
+            fotografia = null
+            errores = SolicitudErrores()
+            errorFotografia = null
+        }
+    }
 
     val camaraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
         if (bitmap != null) {
             fotografia = bitmap
+            errorFotografia = null
         }
     }
 
@@ -107,6 +130,7 @@ fun ColaboracionScreen(
                     errores = errores.copy(nombre = null)
                 },
                 label = { Text("Nombre completo") },
+                leadingIcon = { Text("👤") },
                 isError = errores.nombre != null,
                 supportingText = {
                     errores.nombre?.let { Text(it) }
@@ -122,6 +146,7 @@ fun ColaboracionScreen(
                     errores = errores.copy(correo = null)
                 },
                 label = { Text("Correo electrónico") },
+                leadingIcon = { Text("✉️") },
                 isError = errores.correo != null,
                 supportingText = {
                     errores.correo?.let { Text(it) }
@@ -139,6 +164,7 @@ fun ColaboracionScreen(
                     }
                 },
                 label = { Text("Edad") },
+                leadingIcon = { Text("🎂") },
                 isError = errores.edad != null,
                 supportingText = {
                     errores.edad?.let { Text(it) }
@@ -156,6 +182,7 @@ fun ColaboracionScreen(
                 label = {
                     Text("Fecha de disponibilidad (DD/MM/AAAA)")
                 },
+                leadingIcon = { Text("📅") },
                 isError = errores.fecha != null,
                 supportingText = {
                     errores.fecha?.let { Text(it) }
@@ -171,6 +198,7 @@ fun ColaboracionScreen(
                     errores = errores.copy(motivo = null)
                 },
                 label = { Text("¿Cómo te gustaría colaborar?") },
+                leadingIcon = { Text("💬") },
                 isError = errores.motivo != null,
                 supportingText = {
                     errores.motivo?.let { Text(it) }
@@ -216,13 +244,23 @@ fun ColaboracionScreen(
                         )
 
                         OutlinedButton(
-                            onClick = { fotografia = null },
+                            onClick = {
+                                fotografia = null
+                                errorFotografia = null
+                            },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Eliminar fotografía")
                         }
                     }
                 }
+            }
+
+            errorFotografia?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
 
             RowColaboracion(
@@ -287,20 +325,47 @@ fun ColaboracionScreen(
                                 resultado.motivo == null &&
                                 resultado.contacto == null
 
-                    if (valido) {
-                        solicitudViewModel.guardarSolicitud(
-                            SolicitudColaboracion(
-                                id = UUID.randomUUID().toString(),
-                                nombre = nombre.trim(),
-                                correo = correo.trim().lowercase(),
-                                edad = edad.toInt(),
-                                fechaDisponibilidad = fecha.trim(),
-                                motivo = motivo.trim(),
-                                aceptaContacto = aceptaContacto,
-                                disponibilidadRegular = disponibilidad,
-                                recibirNovedades = recibirNovedades
+                    if (valido && !uiState.enviando) {
+                        val edadValidada = edad.toIntOrNull()
+
+                        if (edadValidada != null) {
+                            val idSolicitud = UUID.randomUUID().toString()
+
+                            // Sin fotografía, el nombre del archivo será null.
+                            val nombreArchivo = fotografia?.let { bitmap ->
+                                guardarFotografia(
+                                    context = context,
+                                    bitmap = bitmap,
+                                    idSolicitud = idSolicitud
+                                )
+                            }
+
+                            // Si se seleccionó una foto y no se pudo guardar,
+                            // se cancela el envío para no perderla.
+                            if (fotografia != null && nombreArchivo == null) {
+                                errorFotografia =
+                                    "No se pudo guardar la fotografía. " +
+                                            "Inténtalo de nuevo."
+                                return@Button
+                            }
+
+                            errorFotografia = null
+
+                            solicitudViewModel.guardarSolicitud(
+                                SolicitudColaboracion(
+                                    id = idSolicitud,
+                                    nombre = nombre.trim(),
+                                    correo = correo.trim().lowercase(),
+                                    edad = edadValidada,
+                                    fechaDisponibilidad = fecha.trim(),
+                                    motivo = motivo.trim(),
+                                    aceptaContacto = aceptaContacto,
+                                    disponibilidadRegular = disponibilidad,
+                                    recibirNovedades = recibirNovedades,
+                                    rutaFotografia = nombreArchivo
+                                )
                             )
-                        )
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -358,6 +423,35 @@ fun ColaboracionScreen(
                 Text("Volver al inicio")
             }
         }
+    }
+}
+
+private fun guardarFotografia(
+    context: Context,
+    bitmap: Bitmap,
+    idSolicitud: String
+): String? {
+    val nombreArchivo = "solicitud_$idSolicitud.jpg"
+    val archivo = File(context.filesDir, nombreArchivo)
+
+    return try {
+        FileOutputStream(archivo).use { salida ->
+            val guardada = bitmap.compress(
+                Bitmap.CompressFormat.JPEG,
+                90,
+                salida
+            )
+
+            if (!guardada) {
+                archivo.delete()
+                return null
+            }
+        }
+
+        nombreArchivo
+    } catch (e: Exception) {
+        archivo.delete()
+        null
     }
 }
 

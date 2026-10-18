@@ -2,17 +2,14 @@
 package com.example.corpaliv.ui.viewmodel
 
 import android.app.Application
-import android.util.Patterns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.corpaliv.data.SolicitudDataStore
 import com.example.corpaliv.model.SolicitudColaboracion
+import com.example.corpaliv.validation.SolicitudValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.ResolverStyle
 
 data class SolicitudErrores(
     val nombre: String? = null,
@@ -25,9 +22,11 @@ data class SolicitudErrores(
 
 data class SolicitudUiState(
     val enviando: Boolean = false,
+    val cargando: Boolean = false,
     val mensaje: String? = null,
     val error: String? = null,
-    val totalSolicitudes: Int = 0
+    val totalSolicitudes: Int = 0,
+    val solicitudes: List<SolicitudColaboracion> = emptyList()
 )
 
 class SolicitudViewModel(
@@ -47,89 +46,49 @@ class SolicitudViewModel(
         motivo: String,
         aceptaContacto: Boolean
     ): SolicitudErrores {
-        val edadNumero = edad.toIntOrNull()
+        val resultado = SolicitudValidator.validar(
+            nombre = nombre,
+            correo = correo,
+            edad = edad,
+            fecha = fecha,
+            motivo = motivo,
+            aceptaContacto = aceptaContacto
+        )
 
         return SolicitudErrores(
-            nombre = if (nombre.isBlank()) {
-                "El nombre es obligatorio."
-            } else null,
-
-            correo = if (
-                !Patterns.EMAIL_ADDRESS
-                    .matcher(correo.trim())
-                    .matches()
-            ) {
-                "Introduce un correo válido."
-            } else null,
-
-            edad = if (
-                edadNumero == null || edadNumero !in 18..120
-            ) {
-                "Introduce una edad entre 18 y 120 años."
-            } else null,
-
-            fecha = if (!fechaEsValida(fecha)) {
-                "Introduce una fecha real con formato DD/MM/AAAA."
-            } else null,
-
-            motivo = if (motivo.isBlank()) {
-                "Cuéntanos cómo quieres colaborar."
-            } else null,
-
-            contacto = if (!aceptaContacto) {
-                "Debes aceptar que CORPALIV te contacte."
-            } else null
+            nombre = resultado.nombre,
+            correo = resultado.correo,
+            edad = resultado.edad,
+            fecha = resultado.fecha,
+            motivo = resultado.motivo,
+            contacto = resultado.aceptaContacto
         )
     }
-
-
-
-    private fun fechaEsValida(fecha: String): Boolean {
-        val partes = fecha.trim().split("/")
-        if (partes.size != 3) return false
-        val dia = partes[0].toIntOrNull() ?: return false
-        val mes = partes[1].toIntOrNull() ?: return false
-        val anio = partes[2].toIntOrNull() ?: return false
-        if (partes[0].length != 2 ||
-            partes[1].length != 2 ||
-            partes[2].length != 4
-        ) {
-            return false
-        }
-        if (anio !in 1900..9999 || mes !in 1..12) {
-            return false
-        }
-        val diasPorMes = when (mes) {
-            4, 6, 9, 11 -> 30
-            2 -> {
-                val bisiesto = anio % 400 == 0 ||
-                        (anio % 4 == 0 && anio % 100 != 0)
-
-                if (bisiesto) 29 else 28
-            }
-            else -> 31
-        }
-        return dia in 1..diasPorMes
-    }
-
-
 
     fun guardarSolicitud(solicitud: SolicitudColaboracion) {
         if (_uiState.value.enviando) return
 
-        _uiState.value = SolicitudUiState(enviando = true)
+        _uiState.value = _uiState.value.copy(
+            enviando = true,
+            mensaje = null,
+            error = null
+        )
 
         viewModelScope.launch {
             try {
                 almacenamiento.guardarSolicitud(solicitud)
                 val solicitudes = almacenamiento.obtenerSolicitudes()
 
-                _uiState.value = SolicitudUiState(
+                _uiState.value = _uiState.value.copy(
+                    enviando = false,
                     mensaje = "Solicitud guardada correctamente.",
+                    error = null,
+                    solicitudes = solicitudes,
                     totalSolicitudes = solicitudes.size
                 )
             } catch (e: Exception) {
-                _uiState.value = SolicitudUiState(
+                _uiState.value = _uiState.value.copy(
+                    enviando = false,
                     error = "No se pudo guardar la solicitud."
                 )
             }
@@ -137,17 +96,28 @@ class SolicitudViewModel(
     }
 
     fun cargarSolicitudes() {
+        if (_uiState.value.cargando) return
+
+        _uiState.value = _uiState.value.copy(
+            cargando = true,
+            mensaje = null,
+            error = null
+        )
+
         viewModelScope.launch {
             try {
                 val solicitudes = almacenamiento.obtenerSolicitudes()
 
                 _uiState.value = _uiState.value.copy(
+                    cargando = false,
+                    solicitudes = solicitudes,
                     totalSolicitudes = solicitudes.size,
-                    mensaje = "Solicitudes recuperadas correctamente.",
+                    mensaje = null,
                     error = null
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
+                    cargando = false,
                     error = "No se pudieron recuperar las solicitudes."
                 )
             }

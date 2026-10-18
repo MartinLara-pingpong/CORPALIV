@@ -13,11 +13,14 @@ import com.example.corpaliv.ui.screens.LoginScreen
 import com.example.corpaliv.ui.screens.RegistroScreen
 import com.example.corpaliv.ui.screens.ResumenScreen
 import com.example.corpaliv.ui.screens.SeccionContenido
+import com.example.corpaliv.ui.screens.SolicitudesScreen
+import com.example.corpaliv.ui.viewmodel.SolicitudViewModel
 import com.example.corpaliv.ui.viewmodel.UsuarioViewModel
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
     val usuarioViewModel: UsuarioViewModel = viewModel()
+    val solicitudViewModel: SolicitudViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -70,12 +73,29 @@ fun AppNavigation(navController: NavHostController) {
 
         composable("resumen") {
             ResumenScreen(
-                usuarioViewModel = usuarioViewModel
+                usuarioViewModel = usuarioViewModel,
+                onCerrarSesion = {
+                    navController.navigate("login") {
+                        popUpTo("inicio") {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
         composable("colaboracion") {
             ColaboracionScreen(
+                onVolverClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("solicitudes") {
+            SolicitudesScreen(
+                solicitudViewModel = solicitudViewModel,
                 onVolverClick = {
                     navController.popBackStack()
                 }
@@ -97,7 +117,9 @@ fun AppNavigation(navController: NavHostController) {
                                 "y la inclusión sociolaboral."
                     )
                 ),
-                onVolverClick = { navController.popBackStack() }
+                onVolverClick = {
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -115,7 +137,9 @@ fun AppNavigation(navController: NavHostController) {
                                 "Oportunidades de colaboración y responsabilidad social empresarial."
                     )
                 ),
-                onVolverClick = { navController.popBackStack() }
+                onVolverClick = {
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -132,7 +156,9 @@ fun AppNavigation(navController: NavHostController) {
                                 "Espacio para mostrar propuestas de colaboración con empresas."
                     )
                 ),
-                onVolverClick = { navController.popBackStack() }
+                onVolverClick = {
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -149,7 +175,9 @@ fun AppNavigation(navController: NavHostController) {
                                 "Ejemplo ficticio de una alianza que facilita nuevas oportunidades."
                     )
                 ),
-                onVolverClick = { navController.popBackStack() }
+                onVolverClick = {
+                    navController.popBackStack()
+                }
             )
         }
     }
