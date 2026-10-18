@@ -50,9 +50,17 @@ fun AppNavigation(navController: NavHostController) {
                         popUpTo("inicio")
                     }
                 },
+                onVolverInicio = {
+                    navController.popBackStack(
+                        route = "inicio",
+                        inclusive = false
+                    )
+                },
                 usuarioViewModel = usuarioViewModel
             )
         }
+
+
 
         composable("login") {
             LoginScreen(
@@ -67,13 +75,29 @@ fun AppNavigation(navController: NavHostController) {
                 onRegistroClick = {
                     navController.navigate("registro")
                 },
+                onVolverInicio = {
+                    navController.navigate("inicio") {
+                        popUpTo("inicio") {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
+                },
                 usuarioViewModel = usuarioViewModel
             )
         }
 
+
+
+
         composable("resumen") {
             ResumenScreen(
                 usuarioViewModel = usuarioViewModel,
+                onVolverInicio = {
+                    navController.navigate("inicio") {
+                        launchSingleTop = true
+                    }
+                },
                 onCerrarSesion = {
                     navController.navigate("login") {
                         popUpTo("inicio") {
@@ -85,10 +109,14 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
+
         composable("colaboracion") {
             ColaboracionScreen(
                 onVolverClick = {
                     navController.popBackStack()
+                },
+                onVerSolicitudesClick = {
+                    navController.navigate("solicitudes")
                 }
             )
         }

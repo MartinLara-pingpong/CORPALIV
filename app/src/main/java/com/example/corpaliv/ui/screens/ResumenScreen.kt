@@ -15,8 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,10 +48,10 @@ private const val ARCHIVO_FOTO_PERFIL = "foto_perfil.jpg"
 @Composable
 fun ResumenScreen(
     usuarioViewModel: UsuarioViewModel,
-    onCerrarSesion: () -> Unit
+    onCerrarSesion: () -> Unit,
+    onVolverInicio: () -> Unit
 ) {
     val uiState by usuarioViewModel.uiState.collectAsState()
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -85,14 +88,18 @@ fun ResumenScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(text = "Mi perfil")
+        Text(
+            text = "Mi perfil",
+            style = MaterialTheme.typography.headlineMedium
+        )
 
         if (cargandoFoto) {
-            Text(text = "Cargando foto...")
+            Text("Cargando foto...")
         } else if (fotoPerfil != null) {
             Image(
                 bitmap = fotoPerfil!!.asImageBitmap(),
@@ -103,7 +110,7 @@ fun ResumenScreen(
                 contentScale = ContentScale.Crop
             )
         } else {
-            Text(text = "Todavía no tienes una foto de perfil.")
+            Text("Todavía no tienes una foto de perfil.")
         }
 
         Button(
@@ -111,7 +118,7 @@ fun ResumenScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = if (fotoPerfil == null) {
+                if (fotoPerfil == null) {
                     "Hacer foto de perfil"
                 } else {
                     "Cambiar foto de perfil"
@@ -137,78 +144,89 @@ fun ResumenScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Eliminar foto")
+                Text("Eliminar foto")
             }
         }
 
         if (mensajeFoto.isNotBlank()) {
-            Text(text = mensajeFoto)
+            Text(mensajeFoto)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = "Información de tu cuenta")
-        Text(text = "Nombre: ${uiState.nombre}")
-        Text(text = "Correo: ${uiState.correo}")
-        Text(text = "Dirección: ${uiState.direccion}")
+        Text(
+            text = "Información de tu cuenta",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Text("Nombre: ${uiState.nombre}")
+        Text("Correo: ${uiState.correo}")
+        Text("Dirección: ${uiState.direccion}")
 
         Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = onVolverInicio,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("← Volver al inicio")
+        }
 
         OutlinedButton(
             onClick = onCerrarSesion,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Cerrar sesión")
+            Text("Cerrar sesión")
         }
     }
 }
 
-private fun guardarFoto(
-    context: Context,
-    bitmap: Bitmap
-): Boolean {
-    return try {
-        context.openFileOutput(
-            ARCHIVO_FOTO_PERFIL,
-            Context.MODE_PRIVATE
-        ).use { output ->
-            bitmap.compress(
-                Bitmap.CompressFormat.JPEG,
-                90,
-                output
-            )
+        private fun guardarFoto(
+            context: Context,
+            bitmap: Bitmap
+        ): Boolean {
+            return try {
+                context.openFileOutput(
+                    ARCHIVO_FOTO_PERFIL,
+                    Context.MODE_PRIVATE
+                ).use { output ->
+                    bitmap.compress(
+                        Bitmap.CompressFormat.JPEG,
+                        90,
+                        output
+                    )
+                }
+            } catch (e: Exception) {
+                false
+            }
         }
-    } catch (e: Exception) {
-        false
-    }
-}
 
-private fun cargarFoto(context: Context): Bitmap? {
-    return try {
-        val archivo = File(
-            context.filesDir,
-            ARCHIVO_FOTO_PERFIL
-        )
+        private fun cargarFoto(context: Context): Bitmap? {
+            return try {
+                val archivo = File(
+                    context.filesDir,
+                    ARCHIVO_FOTO_PERFIL
+                )
 
-        if (archivo.exists()) {
-            BitmapFactory.decodeFile(archivo.absolutePath)
-        } else {
-            null
+                if (archivo.exists()) {
+                    BitmapFactory.decodeFile(archivo.absolutePath)
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                null
+            }
         }
-    } catch (e: Exception) {
-        null
-    }
-}
 
-private fun eliminarFoto(context: Context): Boolean {
-    return try {
-        val archivo = File(
-            context.filesDir,
-            ARCHIVO_FOTO_PERFIL
-        )
+        private fun eliminarFoto(context: Context): Boolean {
+            return try {
+                val archivo = File(
+                    context.filesDir,
+                    ARCHIVO_FOTO_PERFIL
+                )
 
-        !archivo.exists() || archivo.delete()
-    } catch (e: Exception) {
-        false
-    }
-}
+                !archivo.exists() || archivo.delete()
+            } catch (e: Exception) {
+                false
+            }
+        }
