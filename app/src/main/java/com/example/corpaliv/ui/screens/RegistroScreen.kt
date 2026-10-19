@@ -15,8 +15,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,6 +40,7 @@ private val RegistroAzul = Color(0xFF102C50)
 private val RegistroVerde = Color(0xFF35A879)
 private val RegistroFondo = Color(0xFFF3F6FA)
 private val RegistroGris = Color(0xFF63738A)
+private val RegistroError = Color(0xFFB3261E)
 
 @Composable
 fun RegistroScreen(
@@ -115,6 +119,15 @@ fun RegistroScreen(
                 onValueChange = usuarioViewModel::actualizarNombre,
                 label = { Text("Nombre completo") },
                 isError = errores.nombre != null,
+                trailingIcon = {
+                    if (errores.nombre != null) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Error en el nombre",
+                            tint = RegistroError
+                        )
+                    }
+                },
                 supportingText = {
                     errores.nombre?.let { Text(it) }
                 },
@@ -131,6 +144,15 @@ fun RegistroScreen(
                     keyboardType = KeyboardType.Email
                 ),
                 isError = errores.correo != null,
+                trailingIcon = {
+                    if (errores.correo != null) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Error en el correo",
+                            tint = RegistroError
+                        )
+                    }
+                },
                 supportingText = {
                     errores.correo?.let { Text(it) }
                 },
@@ -148,6 +170,15 @@ fun RegistroScreen(
                     keyboardType = KeyboardType.Password
                 ),
                 isError = errores.clave != null,
+                trailingIcon = {
+                    if (errores.clave != null) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Error en la contraseña",
+                            tint = RegistroError
+                        )
+                    }
+                },
                 supportingText = {
                     errores.clave?.let { Text(it) }
                 },
@@ -161,6 +192,15 @@ fun RegistroScreen(
                 onValueChange = usuarioViewModel::actualizarDireccion,
                 label = { Text("Dirección") },
                 isError = errores.direccion != null,
+                trailingIcon = {
+                    if (errores.direccion != null) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Error en la dirección",
+                            tint = RegistroError
+                        )
+                    }
+                },
                 supportingText = {
                     errores.direccion?.let { Text(it) }
                 },
@@ -205,9 +245,7 @@ fun RegistroScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextButton(
-            onClick = onVolverInicio
-        ) {
+        TextButton(onClick = onVolverInicio) {
             Text(
                 text = "← Volver al inicio",
                 color = RegistroAzul,

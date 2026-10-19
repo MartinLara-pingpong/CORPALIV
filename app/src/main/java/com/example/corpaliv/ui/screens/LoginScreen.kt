@@ -14,8 +14,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,6 +41,7 @@ private val LoginAzul = Color(0xFF102C50)
 private val LoginVerde = Color(0xFF35A879)
 private val LoginFondo = Color(0xFFF3F6FA)
 private val LoginGris = Color(0xFF63738A)
+private val LoginError = Color(0xFFB3261E)
 
 @Composable
 fun LoginScreen(
@@ -50,6 +54,9 @@ fun LoginScreen(
     var clave by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var cargando by rememberSaveable { mutableStateOf(false) }
+
+    val errorCorreo = error != null
+    val errorClave = error != null
 
     Column(
         modifier = Modifier
@@ -131,6 +138,16 @@ fun LoginScreen(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email
                 ),
+                isError = errorCorreo,
+                trailingIcon = {
+                    if (errorCorreo) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Error de acceso",
+                            tint = LoginError
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 singleLine = true
@@ -147,6 +164,16 @@ fun LoginScreen(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password
                 ),
+                isError = errorClave,
+                trailingIcon = {
+                    if (errorClave) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Error de acceso",
+                            tint = LoginError
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 singleLine = true
@@ -155,7 +182,7 @@ fun LoginScreen(
             if (error != null) {
                 Text(
                     text = error!!,
-                    color = Color(0xFFB3261E),
+                    color = LoginError,
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
