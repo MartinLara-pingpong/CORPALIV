@@ -6,6 +6,7 @@ import android.util.Patterns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.corpaliv.data.UsuarioDataStore
+import com.example.corpaliv.data.UsuarioRepository
 import com.example.corpaliv.model.UsuarioErrores
 import com.example.corpaliv.model.UsuarioUiState
 import kotlinx.coroutines.CancellationException
@@ -21,7 +22,9 @@ class UsuarioViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val usuarioDataStore = UsuarioDataStore(application)
+    private val usuarioRepository = UsuarioRepository(
+        UsuarioDataStore(application)
+    )
 
     private val _uiState = MutableStateFlow(UsuarioUiState())
     val uiState: StateFlow<UsuarioUiState> = _uiState.asStateFlow()
@@ -31,7 +34,7 @@ class UsuarioViewModel(
 
     init {
         viewModelScope.launch {
-            usuarioDataStore.usuario.collect { usuario ->
+            usuarioRepository.usuario.collect { usuario ->
                 _uiState.update { estado ->
                     estado.copy(
                         nombre = usuario.nombre,
@@ -72,7 +75,6 @@ class UsuarioViewModel(
             } else {
                 null
             },
-
             correo = if (
                 datos.correo.isBlank() ||
                 !Patterns.EMAIL_ADDRESS
@@ -83,13 +85,11 @@ class UsuarioViewModel(
             } else {
                 null
             },
-
             clave = if (datos.clave.length < 6) {
                 "La contraseña debe tener al menos 6 caracteres."
             } else {
                 null
             },
-
             direccion = if (datos.direccion.isBlank()) {
                 "Introduce tu dirección."
             } else {
@@ -116,7 +116,7 @@ class UsuarioViewModel(
         viewModelScope.launch {
             try {
                 val registrada = withContext(Dispatchers.IO) {
-                    usuarioDataStore.registrarCuenta(
+                    usuarioRepository.registrarCuenta(
                         nombre = datos.nombre,
                         correo = datos.correo,
                         direccion = datos.direccion,
@@ -163,7 +163,7 @@ class UsuarioViewModel(
         viewModelScope.launch {
             try {
                 val valido = withContext(Dispatchers.IO) {
-                    usuarioDataStore.validarCredenciales(
+                    usuarioRepository.validarCredenciales(
                         correo = correo,
                         clave = clave
                     )
