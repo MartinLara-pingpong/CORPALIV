@@ -192,8 +192,7 @@ fun SolicitudesScreen(
                         )
 
                         Text(
-                            text = estado.error
-                                ?: "Se ha producido un error.",
+                            text = estado.error ?: "Se ha producido un error.",
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
 
@@ -269,7 +268,12 @@ fun SolicitudesScreen(
                 items = estado.solicitudes,
                 key = { solicitud -> solicitud.id }
             ) { solicitud ->
-                SolicitudCard(solicitud = solicitud)
+                SolicitudCard(
+                    solicitud = solicitud,
+                    onEliminarClick = {
+                        solicitudViewModel.eliminarSolicitud(solicitud.id)
+                    }
+                )
             }
         }
 
@@ -286,7 +290,8 @@ fun SolicitudesScreen(
 
 @Composable
 private fun SolicitudCard(
-    solicitud: SolicitudColaboracion
+    solicitud: SolicitudColaboracion,
+    onEliminarClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -315,7 +320,6 @@ private fun SolicitudCard(
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Foto de perfil junto al nombre y al correo.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -420,6 +424,16 @@ private fun SolicitudCard(
                 etiqueta = "Recibir novedades",
                 valor = solicitud.recibirNovedades
             )
+
+            OutlinedButton(
+                onClick = onEliminarClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Eliminar solicitud",
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }
