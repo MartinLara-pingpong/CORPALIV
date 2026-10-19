@@ -70,6 +70,62 @@ class SolicitudDataStore(
 
         return eliminada
     }
+    suspend fun actualizarSolicitud(
+        solicitudActualizada: SolicitudColaboracion
+    ): Boolean {
+        var actualizada = false
+
+        context.solicitudesDataStore.edit { preferencias ->
+            val contenido = preferencias[solicitudesKey]
+                ?: return@edit
+
+            val solicitudesActuales = JSONArray(contenido)
+            val solicitudesActualizadas = JSONArray()
+
+            for (indice in 0 until solicitudesActuales.length()) {
+                val elemento = solicitudesActuales.getJSONObject(indice)
+
+                if (elemento.getString("id") == solicitudActualizada.id) {
+                    val objetoActualizado = JSONObject().apply {
+                        put("id", solicitudActualizada.id)
+                        put("nombre", solicitudActualizada.nombre)
+                        put("correo", solicitudActualizada.correo)
+                        put("edad", solicitudActualizada.edad)
+                        put(
+                            "fechaDisponibilidad",
+                            solicitudActualizada.fechaDisponibilidad
+                        )
+                        put("motivo", solicitudActualizada.motivo)
+                        put("aceptaContacto", solicitudActualizada.aceptaContacto)
+                        put(
+                            "disponibilidadRegular",
+                            solicitudActualizada.disponibilidadRegular
+                        )
+                        put(
+                            "recibirNovedades",
+                            solicitudActualizada.recibirNovedades
+                        )
+                        put(
+                            "rutaFotografia",
+                            solicitudActualizada.rutaFotografia
+                        )
+                    }
+
+                    solicitudesActualizadas.put(objetoActualizado)
+                    actualizada = true
+                } else {
+                    solicitudesActualizadas.put(elemento)
+                }
+            }
+
+            if (actualizada) {
+                preferencias[solicitudesKey] =
+                    solicitudesActualizadas.toString()
+            }
+        }
+
+        return actualizada
+    }
 
 
     suspend fun obtenerSolicitudes(): List<SolicitudColaboracion> {

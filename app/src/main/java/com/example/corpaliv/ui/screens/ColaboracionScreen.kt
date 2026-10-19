@@ -1,8 +1,5 @@
-
 package com.example.corpaliv.ui.screens
 
-import android.content.Context
-import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -44,26 +41,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.corpaliv.model.SolicitudColaboracion
-import com.example.corpaliv.ui.viewmodel.SolicitudErrores
 import com.example.corpaliv.ui.viewmodel.SolicitudViewModel
-import java.io.File
-import java.io.FileOutputStream
 import java.util.UUID
 
 private val ColAzul = Color(0xFF102C50)
@@ -78,48 +68,18 @@ fun ColaboracionScreen(
     onVerSolicitudesClick: () -> Unit,
     solicitudViewModel: SolicitudViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-
-    var nombre by remember { mutableStateOf("") }
-    var correo by remember { mutableStateOf("") }
-    var edad by remember { mutableStateOf("") }
-    var fecha by remember { mutableStateOf("") }
-    var motivo by remember { mutableStateOf("") }
-
-    var aceptaContacto by remember { mutableStateOf(false) }
-    var disponibilidad by remember { mutableStateOf(false) }
-    var recibirNovedades by remember { mutableStateOf(false) }
-
-    var errores by remember { mutableStateOf(SolicitudErrores()) }
-    var fotografia by remember { mutableStateOf<Bitmap?>(null) }
-    var errorFotografia by remember { mutableStateOf<String?>(null) }
-
     val uiState by solicitudViewModel.uiState.collectAsState()
-
-    LaunchedEffect(uiState.mensaje) {
-        if (uiState.mensaje == "Solicitud guardada correctamente.") {
-            nombre = ""
-            correo = ""
-            edad = ""
-            fecha = ""
-            motivo = ""
-            aceptaContacto = false
-            disponibilidad = false
-            recibirNovedades = false
-            fotografia = null
-            errores = SolicitudErrores()
-            errorFotografia = null
-        }
-    }
+    val formulario by solicitudViewModel.formularioState.collectAsState()
 
     val camaraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
         if (bitmap != null) {
-            fotografia = bitmap
-            errorFotografia = null
+            solicitudViewModel.actualizarFotografia(bitmap)
         } else {
-            errorFotografia = "No se capturó ninguna fotografía."
+            solicitudViewModel.actualizarErrorFotografia(
+                "No se capturó ninguna fotografía."
+            )
         }
     }
 
@@ -235,8 +195,12 @@ fun ColaboracionScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(18.dp),
@@ -256,16 +220,13 @@ fun ColaboracionScreen(
                     )
 
                     OutlinedTextField(
-                        value = nombre,
-                        onValueChange = {
-                            nombre = it
-                            errores = errores.copy(nombre = null)
-                        },
+                        value = formulario.nombre,
+                        onValueChange = solicitudViewModel::actualizarNombre,
                         label = { Text("Nombre completo") },
                         leadingIcon = { Text("👤") },
-                        isError = errores.nombre != null,
+                        isError = formulario.errores.nombre != null,
                         supportingText = {
-                            errores.nombre?.let { Text(it) }
+                            formulario.errores.nombre?.let { Text(it) }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
@@ -273,19 +234,16 @@ fun ColaboracionScreen(
                     )
 
                     OutlinedTextField(
-                        value = correo,
-                        onValueChange = {
-                            correo = it
-                            errores = errores.copy(correo = null)
-                        },
+                        value = formulario.correo,
+                        onValueChange = solicitudViewModel::actualizarCorreo,
                         label = { Text("Correo electrónico") },
                         leadingIcon = { Text("✉️") },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email
                         ),
-                        isError = errores.correo != null,
+                        isError = formulario.errores.correo != null,
                         supportingText = {
-                            errores.correo?.let { Text(it) }
+                            formulario.errores.correo?.let { Text(it) }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
@@ -293,21 +251,16 @@ fun ColaboracionScreen(
                     )
 
                     OutlinedTextField(
-                        value = edad,
-                        onValueChange = {
-                            if (it.all(Char::isDigit)) {
-                                edad = it
-                                errores = errores.copy(edad = null)
-                            }
-                        },
+                        value = formulario.edad,
+                        onValueChange = solicitudViewModel::actualizarEdad,
                         label = { Text("Edad") },
                         leadingIcon = { Text("🎂") },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number
                         ),
-                        isError = errores.edad != null,
+                        isError = formulario.errores.edad != null,
                         supportingText = {
-                            errores.edad?.let { Text(it) }
+                            formulario.errores.edad?.let { Text(it) }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
@@ -315,17 +268,14 @@ fun ColaboracionScreen(
                     )
 
                     OutlinedTextField(
-                        value = fecha,
-                        onValueChange = {
-                            fecha = it
-                            errores = errores.copy(fecha = null)
-                        },
-                        label = { Text("Fecha de disponibilidad") },
-                        placeholder = { Text("DD/MM/AAAA") },
+                        value = formulario.fecha,
+                        onValueChange = solicitudViewModel::actualizarFecha,
+                        label = { Text("Disponibilidad") },
                         leadingIcon = { Text("📅") },
-                        isError = errores.fecha != null,
+                        placeholder = { Text("Ej.: fines de semana") },
+                        isError = formulario.errores.fecha != null,
                         supportingText = {
-                            errores.fecha?.let { Text(it) }
+                            formulario.errores.fecha?.let { Text(it) }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
@@ -333,17 +283,13 @@ fun ColaboracionScreen(
                     )
 
                     OutlinedTextField(
-                        value = motivo,
-                        onValueChange = {
-                            motivo = it
-                            errores = errores.copy(motivo = null)
-                        },
+                        value = formulario.motivo,
+                        onValueChange = solicitudViewModel::actualizarMotivo,
                         label = { Text("¿Cómo te gustaría colaborar?") },
-                        placeholder = { Text("Cuéntanos tu idea o interés...") },
-                        leadingIcon = { Text("💬") },
-                        isError = errores.motivo != null,
+                        leadingIcon = { Text("💚") },
+                        isError = formulario.errores.motivo != null,
                         supportingText = {
-                            errores.motivo?.let { Text(it) }
+                            formulario.errores.motivo?.let { Text(it) }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
@@ -355,26 +301,40 @@ fun ColaboracionScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 1.dp
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(18.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        "Fotografía opcional",
+                        "Fotografía",
                         color = ColAzul,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
 
                     Text(
-                        "Puedes adjuntar una fotografía tomada con la cámara.",
+                        "Puedes añadir una fotografía para acompañar tu solicitud.",
                         color = ColGris,
-                        fontSize = 13.sp,
-                        lineHeight = 19.sp
+                        fontSize = 13.sp
                     )
+
+                    formulario.fotografia?.let { bitmap ->
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = "Fotografía seleccionada",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(210.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
 
                     OutlinedButton(
                         onClick = { camaraLauncher.launch(null) },
@@ -382,51 +342,31 @@ fun ColaboracionScreen(
                         shape = RoundedCornerShape(14.dp)
                     ) {
                         Text(
-                            if (fotografia == null) {
-                                "📷  Tomar fotografía"
+                            if (formulario.fotografia == null) {
+                                "📷 Tomar fotografía"
                             } else {
-                                "Volver a tomar fotografía"
+                                "📷 Cambiar fotografía"
                             }
                         )
                     }
 
-                    AnimatedVisibility(
-                        visible = fotografia != null,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        fotografia?.let { bitmap ->
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Image(
-                                    bitmap = bitmap.asImageBitmap(),
-                                    contentDescription = "Fotografía capturada",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(220.dp),
-                                    contentScale = ContentScale.Crop
-                                )
-
-                                OutlinedButton(
-                                    onClick = {
-                                        fotografia = null
-                                        errorFotografia = null
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(14.dp)
-                                ) {
-                                    Text("Eliminar fotografía")
-                                }
-                            }
+                    if (formulario.fotografia != null) {
+                        OutlinedButton(
+                            onClick = {
+                                solicitudViewModel.actualizarFotografia(null)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text("Eliminar fotografía")
                         }
                     }
 
-                    errorFotografia?.let {
+                    formulario.errorFotografia?.let {
                         Text(
                             text = it,
                             color = MaterialTheme.colorScheme.error,
-                            fontSize = 13.sp
+                            fontSize = 12.sp
                         )
                     }
                 }
@@ -435,8 +375,12 @@ fun ColaboracionScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 1.dp
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(18.dp),
@@ -459,15 +403,12 @@ fun ColaboracionScreen(
                     PreferenciaColaboracion(
                         texto = "Acepto que CORPALIV me contacte",
                         detalle = "Necesario para gestionar tu solicitud.",
-                        marcado = aceptaContacto,
-                        onCambio = {
-                            aceptaContacto = it
-                            errores = errores.copy(contacto = null)
-                        },
+                        marcado = formulario.aceptaContacto,
+                        onCambio = solicitudViewModel::actualizarAceptaContacto,
                         esInterruptor = false
                     )
 
-                    errores.contacto?.let {
+                    formulario.errores.contacto?.let {
                         Text(
                             text = it,
                             color = MaterialTheme.colorScheme.error,
@@ -478,16 +419,16 @@ fun ColaboracionScreen(
                     PreferenciaColaboracion(
                         texto = "Disponibilidad regular",
                         detalle = "Me interesa colaborar de forma habitual.",
-                        marcado = disponibilidad,
-                        onCambio = { disponibilidad = it },
+                        marcado = formulario.disponibilidadRegular,
+                        onCambio = solicitudViewModel::actualizarDisponibilidadRegular,
                         esInterruptor = true
                     )
 
                     PreferenciaColaboracion(
                         texto = "Recibir novedades",
                         detalle = "Quiero conocer noticias y actividades.",
-                        marcado = recibirNovedades,
-                        onCambio = { recibirNovedades = it },
+                        marcado = formulario.recibirNovedades,
+                        onCambio = solicitudViewModel::actualizarRecibirNovedades,
                         esInterruptor = true
                     )
                 }
@@ -495,58 +436,45 @@ fun ColaboracionScreen(
 
             Button(
                 onClick = {
-                    val resultado = solicitudViewModel.validarSolicitud(
-                        nombre = nombre,
-                        correo = correo,
-                        edad = edad,
-                        fecha = fecha,
-                        motivo = motivo,
-                        aceptaContacto = aceptaContacto
-                    )
-
-                    errores = resultado
-
-                    val valido =
-                        resultado.nombre == null &&
-                                resultado.correo == null &&
-                                resultado.edad == null &&
-                                resultado.fecha == null &&
-                                resultado.motivo == null &&
-                                resultado.contacto == null
+                    val valido = solicitudViewModel.validarFormulario()
 
                     if (valido && !uiState.enviando) {
-                        val edadValidada = edad.toIntOrNull()
+                        val datos = solicitudViewModel.formularioState.value
+                        val edadValidada = datos.edad.toIntOrNull()
 
                         if (edadValidada != null) {
                             val idSolicitud = UUID.randomUUID().toString()
 
-                            val nombreArchivo = fotografia?.let { bitmap ->
-                                guardarFotografia(
-                                    context = context,
+                            val nombreArchivo = datos.fotografia?.let { bitmap ->
+                                solicitudViewModel.guardarFotografia(
                                     bitmap = bitmap,
                                     idSolicitud = idSolicitud
                                 )
                             }
 
-                            if (fotografia != null && nombreArchivo == null) {
-                                errorFotografia =
+                            if (
+                                datos.fotografia != null &&
+                                nombreArchivo == null
+                            ) {
+                                solicitudViewModel.actualizarErrorFotografia(
                                     "No se pudo guardar la fotografía. Inténtalo de nuevo."
+                                )
                                 return@Button
                             }
 
-                            errorFotografia = null
+                            solicitudViewModel.actualizarErrorFotografia(null)
 
                             solicitudViewModel.guardarSolicitud(
                                 SolicitudColaboracion(
                                     id = idSolicitud,
-                                    nombre = nombre.trim(),
-                                    correo = correo.trim().lowercase(),
+                                    nombre = datos.nombre.trim(),
+                                    correo = datos.correo.trim().lowercase(),
                                     edad = edadValidada,
-                                    fechaDisponibilidad = fecha.trim(),
-                                    motivo = motivo.trim(),
-                                    aceptaContacto = aceptaContacto,
-                                    disponibilidadRegular = disponibilidad,
-                                    recibirNovedades = recibirNovedades,
+                                    fechaDisponibilidad = datos.fecha.trim(),
+                                    motivo = datos.motivo.trim(),
+                                    aceptaContacto = datos.aceptaContacto,
+                                    disponibilidadRegular = datos.disponibilidadRegular,
+                                    recibirNovedades = datos.recibirNovedades,
                                     rutaFotografia = nombreArchivo
                                 )
                             )
@@ -715,30 +643,5 @@ private fun PreferenciaColaboracion(
                 onCheckedChange = onCambio
             )
         }
-    }
-}
-
-private fun guardarFotografia(
-    context: Context,
-    bitmap: Bitmap,
-    idSolicitud: String
-): String? {
-    val nombreArchivo = "solicitud_$idSolicitud.jpg"
-    val archivo = File(context.filesDir, nombreArchivo)
-
-    return try {
-        val guardada = FileOutputStream(archivo).use { salida ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, salida)
-        }
-
-        if (guardada) {
-            nombreArchivo
-        } else {
-            archivo.delete()
-            null
-        }
-    } catch (e: Exception) {
-        archivo.delete()
-        null
     }
 }

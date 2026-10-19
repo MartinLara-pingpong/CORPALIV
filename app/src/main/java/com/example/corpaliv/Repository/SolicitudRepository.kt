@@ -18,4 +18,10 @@ class SolicitudRepository(
         return solicitudDataStore.eliminarSolicitud(id)
     }
 
+    suspend fun actualizarSolicitud(
+        solicitud: SolicitudColaboracion
+    ): Boolean {
+        return solicitudDataStore.actualizarSolicitud(solicitud)
+    }
+
 }
