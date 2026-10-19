@@ -5,6 +5,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.corpaliv.data.SolicitudDataStore
+import com.example.corpaliv.data.SolicitudRepository
 import com.example.corpaliv.model.SolicitudColaboracion
 import com.example.corpaliv.validation.SolicitudValidator
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,9 @@ class SolicitudViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val almacenamiento = SolicitudDataStore(application)
+    private val solicitudRepository = SolicitudRepository(
+        SolicitudDataStore(application)
+    )
 
     private val _uiState = MutableStateFlow(SolicitudUiState())
     val uiState = _uiState.asStateFlow()
@@ -76,8 +79,8 @@ class SolicitudViewModel(
 
         viewModelScope.launch {
             try {
-                almacenamiento.guardarSolicitud(solicitud)
-                val solicitudes = almacenamiento.obtenerSolicitudes()
+                solicitudRepository.guardarSolicitud(solicitud)
+                val solicitudes = solicitudRepository.obtenerSolicitudes()
 
                 _uiState.value = _uiState.value.copy(
                     enviando = false,
@@ -106,7 +109,7 @@ class SolicitudViewModel(
 
         viewModelScope.launch {
             try {
-                val solicitudes = almacenamiento.obtenerSolicitudes()
+                val solicitudes = solicitudRepository.obtenerSolicitudes()
 
                 _uiState.value = _uiState.value.copy(
                     cargando = false,
