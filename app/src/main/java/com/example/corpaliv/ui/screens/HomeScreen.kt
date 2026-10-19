@@ -2,6 +2,10 @@
 package com.example.corpaliv.ui.screens
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -27,6 +30,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -35,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 private val HomeAzul = Color(0xFF102C50)
 private val HomeAzulMedio = Color(0xFF245B91)
@@ -52,6 +61,15 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
 
+    var mostrarContenido by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        mostrarContenido = true
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -60,130 +78,172 @@ fun HomeScreen(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(22.dp)
     ) {
+
         // Encabezado
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        AnimatedVisibility(
+            visible = mostrarContenido,
+            enter = fadeIn(tween(450)) +
+                    slideInVertically(
+                        initialOffsetY = { -it / 8 },
+                        animationSpec = tween(450)
+                    )
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(HomeAzul, RoundedCornerShape(15.dp)),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("C", color = Color.White, fontSize = 29.sp,
-                    fontWeight = FontWeight.ExtraBold)
-            }
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            HomeAzul,
+                            RoundedCornerShape(15.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "C",
+                        color = Color.White,
+                        fontSize = 29.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
 
-            Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(12.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "CORPALIV",
-                    color = HomeAzul,
-                    fontSize = 21.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    "Inclusión y oportunidades",
-                    color = HomeTextoSecundario,
-                    fontSize = 11.sp
-                )
-            }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "CORPALIV",
+                        color = HomeAzul,
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
 
-            OutlinedButton(
-                onClick = onLoginClick,
-                shape = RoundedCornerShape(13.dp)
-            ) {
-                Text("Entrar", color = HomeAzul)
+                    Text(
+                        text = "Inclusión y oportunidades",
+                        color = HomeTextoSecundario,
+                        fontSize = 11.sp
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = onLoginClick,
+                    shape = RoundedCornerShape(13.dp)
+                ) {
+                    Text(
+                        text = "Entrar",
+                        color = HomeAzul
+                    )
+                }
             }
         }
 
         // Portada principal
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            color = HomeAzul
+        AnimatedVisibility(
+            visible = mostrarContenido,
+            enter = fadeIn(tween(600)) +
+                    slideInVertically(
+                        initialOffsetY = { it / 10 },
+                        animationSpec = tween(600)
+                    )
         ) {
-            Column(
-                modifier = Modifier
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                HomeAzul,
-                                HomeAzulMedio,
-                                Color(0xFF147C82)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                color = HomeAzul
+            ) {
+                Column(
+                    modifier = Modifier
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    HomeAzul,
+                                    HomeAzulMedio,
+                                    Color(0xFF147C82)
+                                )
                             )
                         )
-                    )
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(17.dp)
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(50.dp),
-                    color = Color.White.copy(alpha = 0.14f)
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(17.dp)
                 ) {
+                    Surface(
+                        shape = RoundedCornerShape(50.dp),
+                        color = Color.White.copy(alpha = 0.14f)
+                    ) {
+                        Text(
+                            text = "INCLUSIÓN QUE TRANSFORMA",
+                            modifier = Modifier.padding(
+                                horizontal = 13.dp,
+                                vertical = 9.dp
+                            ),
+                            color = Color(0xFF9CF0C5),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                    }
+
                     Text(
-                        "INCLUSIÓN QUE TRANSFORMA",
-                        modifier = Modifier.padding(
-                            horizontal = 13.dp,
-                            vertical = 9.dp
-                        ),
-                        color = Color(0xFF9CF0C5),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
+                        text = "Un mundo con más oportunidades para todos.",
+                        color = Color.White,
+                        fontSize = 30.sp,
+                        lineHeight = 36.sp,
+                        fontWeight = FontWeight.ExtraBold
                     )
-                }
 
-                Text(
-                    text = "Un mundo con más oportunidades para todos.",
-                    color = Color.White,
-                    fontSize = 30.sp,
-                    lineHeight = 36.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-
-                Text(
-                    text = "Conoce nuestra labor y descubre cómo puedes contribuir a una sociedad más inclusiva.",
-                    color = Color.White.copy(alpha = 0.88f),
-                    fontSize = 14.sp,
-                    lineHeight = 21.sp
-                )
-
-                Button(
-                    onClick = onColaborarClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF75D7A8),
-                        contentColor = HomeAzul
-                    )
-                ) {
                     Text(
-                        "Quiero colaborar  →",
-                        fontWeight = FontWeight.Bold
+                        text = "Conoce nuestra labor y descubre cómo puedes contribuir a una sociedad más inclusiva.",
+                        color = Color.White.copy(alpha = 0.88f),
+                        fontSize = 14.sp,
+                        lineHeight = 21.sp
                     )
+
+                    Button(
+                        onClick = onColaborarClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF75D7A8),
+                            contentColor = HomeAzul
+                        )
+                    ) {
+                        Text(
+                            text = "Quiero colaborar  →",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
 
         // Accesos a las secciones
-        Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            Text(
-                "Descubre CORPALIV",
-                color = HomeAzul,
-                fontSize = 23.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                "Conoce nuestra misión, nuestros programas y nuestro trabajo.",
-                color = HomeTextoSecundario,
-                fontSize = 14.sp,
-                lineHeight = 20.sp
-            )
+        AnimatedVisibility(
+            visible = mostrarContenido,
+            enter = fadeIn(tween(700)) +
+                    slideInVertically(
+                        initialOffsetY = { it / 12 },
+                        animationSpec = tween(700)
+                    )
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(7.dp)
+            ) {
+                Text(
+                    text = "Descubre CORPALIV",
+                    color = HomeAzul,
+                    fontSize = 23.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Conoce nuestra misión, nuestros programas y nuestro trabajo.",
+                    color = HomeTextoSecundario,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp
+                )
+            }
         }
 
         TarjetaInicio(
@@ -219,41 +279,55 @@ fun HomeScreen(
         )
 
         // Invitación a crear una cuenta
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 2.dp
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    "Forma parte del cambio",
-                    fontSize = 19.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = HomeAzul
-                )
-                Text(
-                    "Crea tu cuenta para acceder a tu perfil y participar.",
-                    color = HomeTextoSecundario,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp
-                )
-                Button(
-                    onClick = onRegistroClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = HomeVerde
+        AnimatedVisibility(
+            visible = mostrarContenido,
+            enter = fadeIn(tween(850)) +
+                    slideInVertically(
+                        initialOffsetY = { it / 12 },
+                        animationSpec = tween(850)
                     )
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text("Crear una cuenta", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Forma parte del cambio",
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = HomeAzul
+                    )
+
+                    Text(
+                        text = "Crea tu cuenta para acceder a tu perfil y participar.",
+                        color = HomeTextoSecundario,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp
+                    )
+
+                    Button(
+                        onClick = onRegistroClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = HomeVerde
+                        )
+                    ) {
+                        Text(
+                            text = "Crear una cuenta",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -263,15 +337,22 @@ fun HomeScreen(
             onClick = {
                 val compartir = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, "Conoce CORPALIV")
+                    putExtra(
+                        Intent.EXTRA_SUBJECT,
+                        "Conoce CORPALIV"
+                    )
                     putExtra(
                         Intent.EXTRA_TEXT,
                         "Conoce CORPALIV y su labor de inclusión social y laboral. " +
                                 "Infórmate sobre sus programas y descubre cómo colaborar."
                     )
                 }
+
                 context.startActivity(
-                    Intent.createChooser(compartir, "Compartir CORPALIV")
+                    Intent.createChooser(
+                        compartir,
+                        "Compartir CORPALIV"
+                    )
                 )
             },
             modifier = Modifier.fillMaxWidth(),
@@ -281,7 +362,7 @@ fun HomeScreen(
         }
 
         Text(
-            "CORPALIV · Inclusión y oportunidades",
+            text = "CORPALIV · Inclusión y oportunidades",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
@@ -319,24 +400,34 @@ private fun TarjetaInicio(
             Box(
                 modifier = Modifier
                     .size(52.dp)
-                    .background(colorIcono, RoundedCornerShape(17.dp)),
+                    .background(
+                        colorIcono,
+                        RoundedCornerShape(17.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(icono, fontSize = 24.sp)
+                Text(
+                    text = icono,
+                    fontSize = 24.sp
+                )
             }
 
             Spacer(Modifier.width(14.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    titulo,
+                    text = titulo,
                     color = HomeAzul,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
+
                 Spacer(Modifier.height(5.dp))
+
                 Text(
-                    descripcion,
+                    text = descripcion,
                     color = HomeTextoSecundario,
                     fontSize = 12.sp,
                     lineHeight = 17.sp
@@ -344,7 +435,7 @@ private fun TarjetaInicio(
             }
 
             Text(
-                "›",
+                text = "›",
                 color = HomeAzulMedio,
                 fontSize = 27.sp,
                 fontWeight = FontWeight.Medium
