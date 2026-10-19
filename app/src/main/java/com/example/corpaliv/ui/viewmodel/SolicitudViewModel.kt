@@ -98,6 +98,38 @@ class SolicitudViewModel(
         }
     }
 
+    fun eliminarSolicitud(id: String) {
+        if (_uiState.value.enviando || _uiState.value.cargando) return
+
+        viewModelScope.launch {
+            try {
+                val eliminada = solicitudRepository.eliminarSolicitud(id)
+
+                if (eliminada) {
+                    val solicitudes = solicitudRepository.obtenerSolicitudes()
+
+                    _uiState.value = _uiState.value.copy(
+                        solicitudes = solicitudes,
+                        totalSolicitudes = solicitudes.size,
+                        mensaje = "Solicitud eliminada correctamente.",
+                        error = null
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        error = "No se encontró la solicitud que quieres eliminar.",
+                        mensaje = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "No se pudo eliminar la solicitud.",
+                    mensaje = null
+                )
+            }
+        }
+    }
+
+
     fun cargarSolicitudes() {
         if (_uiState.value.cargando) return
 

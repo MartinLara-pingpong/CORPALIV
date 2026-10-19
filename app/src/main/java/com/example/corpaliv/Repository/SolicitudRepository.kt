@@ -13,4 +13,9 @@ class SolicitudRepository(
     suspend fun obtenerSolicitudes(): List<SolicitudColaboracion> {
         return solicitudDataStore.obtenerSolicitudes()
     }
+
+    suspend fun eliminarSolicitud(id: String): Boolean {
+        return solicitudDataStore.eliminarSolicitud(id)
+    }
+
 }

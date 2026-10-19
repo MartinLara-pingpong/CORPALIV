@@ -47,6 +47,31 @@ class SolicitudDataStore(
         }
     }
 
+    suspend fun eliminarSolicitud(id: String): Boolean {
+        var eliminada = false
+
+        context.solicitudesDataStore.edit { preferencias ->
+            val contenido = preferencias[solicitudesKey] ?: return@edit
+            val solicitudesActuales = JSONArray(contenido)
+            val solicitudesActualizadas = JSONArray()
+
+            for (indice in 0 until solicitudesActuales.length()) {
+                val solicitud = solicitudesActuales.getJSONObject(indice)
+
+                if (solicitud.getString("id") == id) {
+                    eliminada = true
+                } else {
+                    solicitudesActualizadas.put(solicitud)
+                }
+            }
+
+            preferencias[solicitudesKey] = solicitudesActualizadas.toString()
+        }
+
+        return eliminada
+    }
+
+
     suspend fun obtenerSolicitudes(): List<SolicitudColaboracion> {
         val preferencias = context.solicitudesDataStore.data.first()
         val contenido = preferencias[solicitudesKey]
