@@ -14,8 +14,24 @@ class SolicitudRepository(
         return solicitudDataStore.obtenerSolicitudes()
     }
 
+    suspend fun obtenerSolicitudesPorCorreo(
+        correo: String
+    ): List<SolicitudColaboracion> {
+        return solicitudDataStore.obtenerSolicitudesPorCorreo(correo)
+    }
+
     suspend fun eliminarSolicitud(id: String): Boolean {
         return solicitudDataStore.eliminarSolicitud(id)
+    }
+
+    suspend fun eliminarSolicitudPropia(
+        id: String,
+        correoPropietario: String
+    ): Boolean {
+        return solicitudDataStore.eliminarSolicitudPropia(
+            id,
+            correoPropietario
+        )
     }
 
     suspend fun actualizarSolicitud(
@@ -23,5 +39,4 @@ class SolicitudRepository(
     ): Boolean {
         return solicitudDataStore.actualizarSolicitud(solicitud)
     }
-
 }

@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -40,10 +41,11 @@ fun InfoScreen(
     contenido: SeccionContenido,
     onVolverClick: () -> Unit
 ) {
+    val uriHandler = LocalUriHandler.current
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -52,7 +54,6 @@ fun InfoScreen(
                 .padding(horizontal = 20.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
-
             // Encabezado
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -73,8 +74,7 @@ fun InfoScreen(
 
                 Box(
                     modifier = Modifier
-                        .widthForDecoration()
-                        .height(5.dp)
+                        .size(width = 58.dp, height = 5.dp)
                         .background(
                             color = MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(50)
@@ -118,12 +118,32 @@ fun InfoScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Text(
-                        text = "Descubre nuestros apartados",
+                        text = if (contenido.titulo == "Historias de impacto") {
+                            "Historias reales y experiencias"
+                        } else {
+                            "Descubre nuestros apartados"
+                        },
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
 
                     contenido.apartados.forEachIndexed { indice, apartado ->
+                        val textoCompleto = apartado.second
+                        val patronUrl = Regex("""https?://\S+""")
+                        val url = patronUrl.find(textoCompleto)
+                            ?.value
+                            ?.trimEnd('.', ',', ')', ']')
+
+                        val descripcion = if (url != null) {
+                            textoCompleto
+                                .replace(url, "")
+                                .replace("Publicación oficial:", "")
+                                .replace("Lee la publicación original:", "")
+                                .trim()
+                        } else {
+                            textoCompleto
+                        }
+
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(20.dp),
@@ -170,11 +190,31 @@ fun InfoScreen(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
 
-                                    Text(
-                                        text = apartado.second,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    if (descripcion.isNotBlank()) {
+                                        Text(
+                                            text = descripcion,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    if (url != null) {
+                                        Button(
+                                            onClick = {
+                                                uriHandler.openUri(url)
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        ) {
+                                            Text(
+                                                text = "Leer historia completa →",
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -203,12 +243,4 @@ fun InfoScreen(
             }
         }
     }
-}
-
-@Composable
-private fun Modifier.widthForDecoration(): Modifier {
-    return this.then(
-        Modifier
-            .size(width = 58.dp, height = 5.dp)
-    )
 }

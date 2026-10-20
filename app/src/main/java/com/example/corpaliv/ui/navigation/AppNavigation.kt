@@ -16,7 +16,7 @@ import com.example.corpaliv.ui.screens.SeccionContenido
 import com.example.corpaliv.ui.screens.SolicitudesScreen
 import com.example.corpaliv.ui.viewmodel.SolicitudViewModel
 import com.example.corpaliv.ui.viewmodel.UsuarioViewModel
-
+import com.example.corpaliv.ui.screens.MisColaboracionesScreen
 @Composable
 fun AppNavigation(navController: NavHostController) {
 
@@ -91,6 +91,7 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         // Resumen del usuario
+        // Resumen del usuario
         composable("resumen") {
             ResumenScreen(
                 usuarioViewModel = usuarioViewModel,
@@ -106,11 +107,23 @@ fun AppNavigation(navController: NavHostController) {
                         }
                         launchSingleTop = true
                     }
+                },
+                onMisColaboracionesClick = {
+                    navController.navigate("mis_colaboraciones")
                 }
             )
         }
 
-        // Formulario de colaboración
+// Historial de colaboraciones del usuario
+        composable("mis_colaboraciones") {
+            MisColaboracionesScreen(
+                onVolverClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Colaboración
         composable("colaboracion") {
             ColaboracionScreen(
                 onVolverClick = {
@@ -122,7 +135,7 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        // Solicitudes recibidas
+        // Solicitudes
         composable("solicitudes") {
             SolicitudesScreen(
                 solicitudViewModel = solicitudViewModel,
@@ -204,19 +217,19 @@ fun AppNavigation(navController: NavHostController) {
                             "de colaboración con empresas.",
                     apartados = listOf(
                         "Producción y comercialización" to
-                                "El caso contempla la elaboración y comercialización " +
-                                "de productos vinculados a las iniciativas de Alba Lab. " +
-                                "La disponibilidad concreta debe confirmarse con la organización.",
+                                "Alba Lab desarrolla productos y actividades " +
+                                "de comercialización vinculados a sus iniciativas. " +
+                                "La disponibilidad concreta debe consultarse con " +
+                                "la organización.",
 
                         "Servicios e iniciativas de colaboración" to
                                 "La vinculación empresarial permite explorar " +
-                                "alternativas de colaboración relacionadas con la " +
-                                "inclusión sociolaboral y el impacto social.",
+                                "alternativas relacionadas con la inclusión " +
+                                "sociolaboral y el impacto social.",
 
                         "Responsabilidad social empresarial" to
-                                "CORPALIV gestiona iniciativas de responsabilidad " +
-                                "social empresarial y vinculación con empresas, " +
-                                "familias y donantes."
+                                "CORPALIV trabaja con empresas, familias y donantes " +
+                                "para impulsar oportunidades de inclusión sociolaboral."
                     )
                 ),
                 onVolverClick = {
@@ -225,29 +238,41 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        // Historias e impacto social
+        // Historias de personas y experiencias documentadas por CORPALIV
         composable("historias") {
             InfoScreen(
                 contenido = SeccionContenido(
                     titulo = "Historias de impacto",
-                    descripcion = "Conoce el propósito social de CORPALIV y " +
-                            "la importancia de generar oportunidades de participación, " +
-                            "autonomía e inclusión.",
+                    descripcion = "Personas y experiencias recogidas en publicaciones " +
+                            "de CORPALIV. Consulta las fuentes originales para conocer " +
+                            "sus historias completas.",
                     apartados = listOf(
-                        "Oportunidades de desarrollo" to
-                                "La formación y la preparación para el empleo buscan " +
-                                "favorecer el desarrollo de habilidades y las " +
-                                "oportunidades de participación.",
+                        "Valentina Preece y María Larraín — Bgift Chile" to
+                                "Una publicación de CORPALIV recoge la experiencia " +
+                                "de colaboración de representantes de Bgift Chile " +
+                                "con Alba Lab y el proyecto «Todos tenemos una luz " +
+                                "que hacer brillar». La publicación menciona el trabajo " +
+                                "colaborativo que permitió preparar más de 4.500 regalos.\n\n" +
+                                "Publicación oficial:\n" +
+                                "https://corpaliv.cl/alianzas-bgift-desde-el-inicio-con-alba-lab-y-vamos-por-mas/",
 
-                        "Colaboración con impacto social" to
-                                "La participación de empresas, familias y donantes " +
-                                "forma parte de las iniciativas de vinculación " +
-                                "impulsadas por CORPALIV.",
+                        "Catalina Salazar — Alba Lab" to
+                                "En la publicación del aniversario de Alba Lab se " +
+                                "presenta la trayectoria de la red sociolaboral, su " +
+                                "propósito de generar oportunidades para jóvenes y " +
+                                "adultos con discapacidad múltiple y su relación con " +
+                                "empresas y organizaciones colaboradoras.\n\n" +
+                                "Publicación oficial:\n" +
+                                "https://corpaliv.cl/albalab-cumplimos-un-ano/",
 
-                        "Un propósito compartido" to
-                                "La propuesta busca facilitar que las personas " +
-                                "interesadas conozcan la organización y encuentren " +
-                                "alternativas para colaborar con su labor."
+                        "Alejandra Mahecha, Nicolás Hormando Vaca Díez Trillo " +
+                                "y Nathaly Molina Gómez — voluntariado" to
+                                "Una publicación de CORPALIV presenta una iniciativa " +
+                                "de voluntariado destinada a reunir relatos, poemas, " +
+                                "dibujos y experiencias de familias vinculadas a la " +
+                                "Escuela Especial Jan Van Dijk.\n\n" +
+                                "Publicación oficial:\n" +
+                                "https://corpaliv.cl/escribenos-tu-historia-especial/"
                     )
                 ),
                 onVolverClick = {

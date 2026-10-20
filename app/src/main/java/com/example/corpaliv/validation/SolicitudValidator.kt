@@ -2,9 +2,6 @@
 package com.example.corpaliv.validation
 
 import android.util.Patterns
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 data class ResultadoValidacionSolicitud(
     val nombre: String? = null,
@@ -36,60 +33,46 @@ object SolicitudValidator {
 
         val edadNumero = edad.toIntOrNull()
 
-        val formatoFecha = SimpleDateFormat(
-            "dd/MM/yyyy",
-            Locale.getDefault()
-        ).apply {
-            isLenient = false
-        }
-
-        val fechaValida = try {
-            val fechaParseada = formatoFecha.parse(fecha)
-
-            fechaParseada != null &&
-                    formatoFecha.format(fechaParseada) == fecha &&
-                    !fechaParseada.before(
-                        Calendar.getInstance().apply {
-                            set(Calendar.HOUR_OF_DAY, 0)
-                            set(Calendar.MINUTE, 0)
-                            set(Calendar.SECOND, 0)
-                            set(Calendar.MILLISECOND, 0)
-                        }.time
-                    )
-        } catch (_: Exception) {
-            false
-        }
-
         return ResultadoValidacionSolicitud(
             nombre = if (nombre.isBlank()) {
                 "Introduce tu nombre."
-            } else null,
+            } else {
+                null
+            },
 
             correo = if (
                 !Patterns.EMAIL_ADDRESS
                     .matcher(correo.trim())
                     .matches()
             ) {
-                "Introduce un correo válido."
-            } else null,
+                "Introduce un correo electrónico válido."
+            } else {
+                null
+            },
 
             edad = if (
                 edadNumero == null || edadNumero !in 18..120
             ) {
                 "La edad debe estar entre 18 y 120 años."
-            } else null,
+            } else {
+                null
+            },
 
-            fecha = if (!fechaValida) {
-                "Introduce una fecha válida (DD/MM/AAAA), hoy o posterior."
-            } else null,
+            // Este campo es disponibilidad, no una fecha concreta.
+            fecha = if (fecha.isBlank()) {
+                "Indica cuándo tienes disponibilidad para colaborar."
+            } else {
+                null
+            },
 
             motivo = if (motivo.isBlank()) {
-                "Indica el motivo de tu solicitud."
-            } else null,
+                "Cuéntanos cómo te gustaría colaborar."
+            } else {
+                null
+            },
 
-            aceptaContacto = if (!aceptaContacto) {
-                "Debes aceptar que contactemos contigo."
-            } else null
+            // Aceptar el contacto es opcional.
+            aceptaContacto = null
         )
     }
 }

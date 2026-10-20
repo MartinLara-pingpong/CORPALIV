@@ -37,17 +37,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f82ed09e-61be-4296-93ef-fb1537db9047" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/MisColaboracionesScreen.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/9.3.1/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.3.1/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/9.3.1/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.3.1/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/9.3.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.3.1/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/9.3.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.3.1/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/9.3.1/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.3.1/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/Repository/SolicitudRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/Repository/SolicitudRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/data/SolicitudDataStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/data/SolicitudDataStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/model/SolicitudColaboracion.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/model/SolicitudColaboracion.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/navigation/AppNavigation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/navigation/AppNavigation.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/ColaboracionScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/ColaboracionScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/HomeScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/InfoScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/InfoScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/ResumenScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/screens/ResumenScreen.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/viewmodel/SolicitudViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/ui/viewmodel/SolicitudViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/validation/SolicitudValidator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/corpaliv/validation/SolicitudValidator.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,6 +95,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/androidx.compose.foundation/foundation-android/1.7.2/7e4530f9c5af55ce248300cb0e7a738fdc37d019/foundation-android-1.7.2-sources.jar!/commonMain/androidx/compose/foundation/Scroll.kt" root0="FORCE_HIGHLIGHTING" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.7.3/b03b58f746a4fbf264c9e63f6b35c4f13ec467f4/kotlinx-coroutines-core-jvm-1.7.3-sources.jar!/commonMain/flow/operators/Share.kt" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="KmpPackageLockUpdaterState">{
   &quot;jsModulesKotlinGradlePluginVersion&quot;: {},
   &quot;wasmModulesKotlinGradlePluginVersion&quot;: {}
@@ -97,61 +109,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="2.147270393009685" />
-      <entry key="MS500" value="4.918560460090735" />
-      <entry key="S2" value="10.684958966068317" />
-      <entry key="S5" value="16.079381260786857" />
-      <entry key="S10" value="19.13044573179943" />
-      <entry key="S30" value="25.75892056511752" />
-      <entry key="S60" value="34.85522528030586" />
-      <entry key="M2" value="49.85151105201409" />
-      <entry key="M5" value="86.55072829459644" />
-      <entry key="M10" value="120.29565228807232" />
-      <entry key="M15" value="137.36672249185392" />
-      <entry key="M30" value="158.82413886634407" />
-      <entry key="H1" value="171.59803128483045" />
-      <entry key="H2" value="178.5814484181397" />
-      <entry key="H4" value="182.23445907437267" />
-      <entry key="D1" value="185.36443049859355" />
-      <entry key="W1" value="185.9090067562186" />
+      <entry key="MS100" value="1.0003599290108849" />
+      <entry key="MS500" value="1.2100623826126005" />
+      <entry key="S2" value="2.1825597298626596" />
+      <entry key="S5" value="3.6716064406827447" />
+      <entry key="S10" value="4.887426428726334" />
+      <entry key="S30" value="6.158159786522089" />
+      <entry key="S60" value="6.558718003575626" />
+      <entry key="M2" value="6.774282136757626" />
+      <entry key="M5" value="7.6053823811715695" />
+      <entry key="M10" value="17.777356324321357" />
+      <entry key="M15" value="34.59906830448459" />
+      <entry key="M30" value="78.4039110532544" />
+      <entry key="H1" value="122.37015603757449" />
+      <entry key="H2" value="153.82276366144998" />
+      <entry key="H4" value="172.6814019342637" />
+      <entry key="D1" value="190.26275409683444" />
+      <entry key="W1" value="193.4614133720563" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.32480619129264E-309" />
-      <entry key="MS500" value="1.6766038913605695E-62" />
-      <entry key="S2" value="3.5983849149078763E-16" />
-      <entry key="S5" value="6.644205356353588E-7" />
-      <entry key="S10" value="8.15120039966689E-4" />
-      <entry key="S30" value="0.09386247930318606" />
-      <entry key="S60" value="0.3287961313034815" />
-      <entry key="M2" value="0.7434864715577145" />
-      <entry key="M5" value="1.5414014952229416" />
-      <entry key="M10" value="2.106830614918654" />
-      <entry key="M15" value="2.35929753402575" />
-      <entry key="M30" value="2.6542595649084575" />
-      <entry key="H1" value="2.820201416260997" />
-      <entry key="H2" value="2.908289824613686" />
-      <entry key="H4" value="2.953681928743086" />
-      <entry key="D1" value="2.9922151271500814" />
-      <entry key="W1" value="2.9988862669558802" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="7.670053389412211E-133" />
+      <entry key="S10" value="8.757885047670033E-67" />
+      <entry key="S30" value="9.613567461612652E-23" />
+      <entry key="S60" value="1.052259795314184E-11" />
+      <entry key="M2" value="4.206018801340282E-6" />
+      <entry key="M5" value="0.012273121443022122" />
+      <entry key="M10" value="0.18799627684938203" />
+      <entry key="M15" value="0.471117386755277" />
+      <entry key="M30" value="1.1860871487058233" />
+      <entry key="H1" value="1.8852403697554247" />
+      <entry key="H2" value="2.377831007870308" />
+      <entry key="H4" value="2.6707631602111186" />
+      <entry key="D1" value="2.942420624574637" />
+      <entry key="W1" value="2.991705530279899" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="2.0575191615661206" />
-      <entry key="MS500" value="4.84496152995578" />
-      <entry key="S2" value="10.653132286255698" />
-      <entry key="S5" value="16.061848763293913" />
-      <entry key="S10" value="19.121023490661646" />
-      <entry key="S30" value="25.84732439997623" />
-      <entry key="S60" value="35.179186200586315" />
-      <entry key="M2" value="50.589844687331855" />
-      <entry key="M5" value="88.08602272227839" />
-      <entry key="M10" value="122.39722245966453" />
-      <entry key="M15" value="139.72170781104623" />
-      <entry key="M30" value="161.47570927437584" />
-      <entry key="H1" value="174.4167225549461" />
-      <entry key="H2" value="181.4889368478477" />
-      <entry key="H4" value="185.18772804217176" />
-      <entry key="D1" value="188.35657503426208" />
-      <entry key="W1" value="188.90788289463626" />
+      <entry key="MS100" value="6.711010387155028E-4" />
+      <entry key="MS500" value="0.4084775694757306" />
+      <entry key="S2" value="1.7803306313583265" />
+      <entry key="S5" value="3.389875563269215" />
+      <entry key="S10" value="4.6943936231059356" />
+      <entry key="S30" value="6.075296964135998" />
+      <entry key="S60" value="6.514346462717748" />
+      <entry key="M2" value="6.751308880384019" />
+      <entry key="M5" value="7.608215551866247" />
+      <entry key="M10" value="17.960140495308494" />
+      <entry key="M15" value="35.066143114252725" />
+      <entry key="M30" value="79.58718839114862" />
+      <entry key="H1" value="124.253575797034" />
+      <entry key="H2" value="156.19953159955415" />
+      <entry key="H4" value="175.3515871108612" />
+      <entry key="D1" value="193.205071109282" />
+      <entry key="W1" value="196.45310391045942" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{

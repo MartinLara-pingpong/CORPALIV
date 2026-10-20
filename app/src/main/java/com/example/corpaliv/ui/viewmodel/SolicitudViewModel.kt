@@ -1,3 +1,4 @@
+
 package com.example.corpaliv.ui.viewmodel
 
 import android.app.Application
@@ -18,6 +19,7 @@ import java.io.FileOutputStream
 data class SolicitudErrores(
     val nombre: String? = null,
     val correo: String? = null,
+    val telefono: String? = null,
     val edad: String? = null,
     val fecha: String? = null,
     val motivo: String? = null,
@@ -27,6 +29,7 @@ data class SolicitudErrores(
 data class SolicitudFormularioState(
     val nombre: String = "",
     val correo: String = "",
+    val telefono: String = "",
     val edad: String = "",
     val fecha: String = "",
     val motivo: String = "",
@@ -60,7 +63,6 @@ class SolicitudViewModel(
 
     private val _formularioState =
         MutableStateFlow(SolicitudFormularioState())
-
     val formularioState = _formularioState.asStateFlow()
 
     fun actualizarNombre(valor: String) {
@@ -77,6 +79,15 @@ class SolicitudViewModel(
             it.copy(
                 correo = valor,
                 errores = it.errores.copy(correo = null)
+            )
+        }
+    }
+
+    fun actualizarTelefono(valor: String) {
+        _formularioState.update {
+            it.copy(
+                telefono = valor,
+                errores = it.errores.copy(telefono = null)
             )
         }
     }
@@ -114,7 +125,11 @@ class SolicitudViewModel(
         _formularioState.update {
             it.copy(
                 aceptaContacto = valor,
-                errores = it.errores.copy(contacto = null)
+                telefono = if (valor) it.telefono else "",
+                errores = it.errores.copy(
+                    contacto = null,
+                    telefono = null
+                )
             )
         }
     }
@@ -189,9 +204,26 @@ class SolicitudViewModel(
             aceptaContacto = formulario.aceptaContacto
         )
 
+        val telefonoLimpio = formulario.telefono.filter {
+            it.isDigit()
+        }
+
+        val errorTelefono = when {
+            formulario.aceptaContacto &&
+                    formulario.telefono.isBlank() ->
+                "Introduce tu número de teléfono."
+
+            formulario.aceptaContacto &&
+                    telefonoLimpio.length < 8 ->
+                "Introduce un número de teléfono válido."
+
+            else -> null
+        }
+
         val errores = SolicitudErrores(
             nombre = resultado.nombre,
             correo = resultado.correo,
+            telefono = errorTelefono,
             edad = resultado.edad,
             fecha = resultado.fecha,
             motivo = resultado.motivo,
@@ -204,6 +236,7 @@ class SolicitudViewModel(
 
         return errores.nombre == null &&
                 errores.correo == null &&
+                errores.telefono == null &&
                 errores.edad == null &&
                 errores.fecha == null &&
                 errores.motivo == null &&
@@ -279,131 +312,211 @@ class SolicitudViewModel(
                 }
             }
         }
+    }
 
-        fun actualizarSolicitud(solicitud: SolicitudColaboracion) {
-            if (_uiState.value.enviando || _uiState.value.cargando) return
+    fun actualizarSolicitud(solicitud: SolicitudColaboracion) {
+        if (_uiState.value.enviando || _uiState.value.cargando) return
 
-            _uiState.update {
-                it.copy(
-                    enviando = true,
-                    mensaje = null,
-                    error = null
-                )
-            }
-
-            viewModelScope.launch {
-                try {
-                    val actualizada =
-                        solicitudRepository.actualizarSolicitud(solicitud)
-
-                    if (actualizada) {
-                        val solicitudes =
-                            solicitudRepository.obtenerSolicitudes()
-
-                        _uiState.update {
-                            it.copy(
-                                enviando = false,
-                                solicitudes = solicitudes,
-                                totalSolicitudes = solicitudes.size,
-                                mensaje = "Solicitud actualizada correctamente.",
-                                error = null
-                            )
-                        }
-                    } else {
-                        _uiState.update {
-                            it.copy(
-                                enviando = false,
-                                error = "No se encontró la solicitud que quieres actualizar."
-                            )
-                        }
-                    }
-                } catch (e: Exception) {
-                    _uiState.update {
-                        it.copy(
-                            enviando = false,
-                            error = "No se pudo actualizar la solicitud."
-                        )
-                    }
-                }
-            }
+        _uiState.update {
+            it.copy(
+                enviando = true,
+                mensaje = null,
+                error = null
+            )
         }
 
+        viewModelScope.launch {
+            try {
+                val actualizada =
+                    solicitudRepository.actualizarSolicitud(solicitud)
 
-        fun eliminarSolicitud(id: String) {
-            if (_uiState.value.enviando ||
-                _uiState.value.cargando
-            ) return
-
-            viewModelScope.launch {
-                try {
-                    val eliminada =
-                        solicitudRepository.eliminarSolicitud(id)
-
-                    if (eliminada) {
-                        val solicitudes =
-                            solicitudRepository.obtenerSolicitudes()
-
-                        _uiState.update {
-                            it.copy(
-                                solicitudes = solicitudes,
-                                totalSolicitudes = solicitudes.size,
-                                mensaje = "Solicitud eliminada correctamente.",
-                                error = null
-                            )
-                        }
-                    } else {
-                        _uiState.update {
-                            it.copy(
-                                error = "No se encontró la solicitud que quieres eliminar.",
-                                mensaje = null
-                            )
-                        }
-                    }
-                } catch (e: Exception) {
-                    _uiState.update {
-                        it.copy(
-                            error = "No se pudo eliminar la solicitud.",
-                            mensaje = null
-                        )
-                    }
-                }
-            }
-        }
-
-        fun cargarSolicitudes() {
-            if (_uiState.value.cargando) return
-
-            _uiState.update {
-                it.copy(
-                    cargando = true,
-                    mensaje = null,
-                    error = null
-                )
-            }
-
-            viewModelScope.launch {
-                try {
+                if (actualizada) {
                     val solicitudes =
                         solicitudRepository.obtenerSolicitudes()
 
                     _uiState.update {
                         it.copy(
-                            cargando = false,
+                            enviando = false,
                             solicitudes = solicitudes,
                             totalSolicitudes = solicitudes.size,
-                            mensaje = null,
+                            mensaje = "Solicitud actualizada correctamente.",
                             error = null
                         )
                     }
-                } catch (e: Exception) {
+                } else {
                     _uiState.update {
                         it.copy(
-                            cargando = false,
-                            error = "No se pudieron recuperar las solicitudes."
+                            enviando = false,
+                            error = "No se encontró la solicitud que quieres actualizar."
                         )
                     }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        enviando = false,
+                        error = "No se pudo actualizar la solicitud."
+                    )
                 }
             }
         }
     }
+
+    fun eliminarSolicitud(id: String) {
+        if (_uiState.value.enviando || _uiState.value.cargando) return
+
+        viewModelScope.launch {
+            try {
+                val eliminada =
+                    solicitudRepository.eliminarSolicitud(id)
+
+                if (eliminada) {
+                    val solicitudes =
+                        solicitudRepository.obtenerSolicitudes()
+
+                    _uiState.update {
+                        it.copy(
+                            solicitudes = solicitudes,
+                            totalSolicitudes = solicitudes.size,
+                            mensaje = "Solicitud eliminada correctamente.",
+                            error = null
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            error = "No se encontró la solicitud que quieres eliminar.",
+                            mensaje = null
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        error = "No se pudo eliminar la solicitud.",
+                        mensaje = null
+                    )
+                }
+            }
+        }
+    }
+
+    fun cargarSolicitudes() {
+        if (_uiState.value.cargando) return
+
+        _uiState.update {
+            it.copy(
+                cargando = true,
+                mensaje = null,
+                error = null
+            )
+        }
+
+        viewModelScope.launch {
+            try {
+                val solicitudes =
+                    solicitudRepository.obtenerSolicitudes()
+
+                _uiState.update {
+                    it.copy(
+                        cargando = false,
+                        solicitudes = solicitudes,
+                        totalSolicitudes = solicitudes.size,
+                        mensaje = null,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        cargando = false,
+                        error = "No se pudieron recuperar las solicitudes."
+                    )
+                }
+            }
+        }
+    }
+
+    fun cargarSolicitudesPropias(correo: String) {
+        if (_uiState.value.cargando) return
+
+        _uiState.update {
+            it.copy(
+                cargando = true,
+                mensaje = null,
+                error = null
+            )
+        }
+
+        viewModelScope.launch {
+            try {
+                val solicitudes =
+                    solicitudRepository.obtenerSolicitudesPorCorreo(correo)
+
+                _uiState.update {
+                    it.copy(
+                        cargando = false,
+                        solicitudes = solicitudes,
+                        totalSolicitudes = solicitudes.size,
+                        mensaje = null,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        cargando = false,
+                        error = "No se pudieron cargar tus colaboraciones."
+                    )
+                }
+            }
+        }
+    }
+
+    fun eliminarSolicitudPropia(
+        id: String,
+        correoPropietario: String
+    ) {
+        if (
+            correoPropietario.isBlank() ||
+            _uiState.value.enviando ||
+            _uiState.value.cargando
+        ) return
+
+        viewModelScope.launch {
+            try {
+                val eliminada = solicitudRepository.eliminarSolicitudPropia(
+                    id = id,
+                    correoPropietario = correoPropietario
+                )
+
+                val solicitudes =
+                    solicitudRepository.obtenerSolicitudesPorCorreo(
+                        correoPropietario
+                    )
+
+                _uiState.update {
+                    it.copy(
+                        solicitudes = solicitudes,
+                        totalSolicitudes = solicitudes.size,
+                        mensaje = if (eliminada) {
+                            "Tu solicitud se ha eliminado."
+                        } else {
+                            null
+                        },
+                        error = if (eliminada) {
+                            null
+                        } else {
+                            "No se encontró una solicitud tuya con ese identificador."
+                        }
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(error = "No se pudo eliminar tu solicitud.")
+                }
+            }
+        }
+    }
+
 }

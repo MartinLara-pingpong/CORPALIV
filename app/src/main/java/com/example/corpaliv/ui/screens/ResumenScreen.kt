@@ -49,15 +49,22 @@ private const val ARCHIVO_FOTO_PERFIL = "foto_perfil.jpg"
 fun ResumenScreen(
     usuarioViewModel: UsuarioViewModel,
     onCerrarSesion: () -> Unit,
-    onVolverInicio: () -> Unit
+    onVolverInicio: () -> Unit,
+    onMisColaboracionesClick: () -> Unit
 ) {
     val uiState by usuarioViewModel.uiState.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var fotoPerfil by remember { mutableStateOf<Bitmap?>(null) }
-    var cargandoFoto by remember { mutableStateOf(true) }
-    var mensajeFoto by remember { mutableStateOf("") }
+    var fotoPerfil by remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+    var cargandoFoto by remember {
+        mutableStateOf(true)
+    }
+    var mensajeFoto by remember {
+        mutableStateOf("")
+    }
 
     LaunchedEffect(Unit) {
         fotoPerfil = withContext(Dispatchers.IO) {
@@ -114,7 +121,9 @@ fun ResumenScreen(
         }
 
         Button(
-            onClick = { camaraLauncher.launch(null) },
+            onClick = {
+                camaraLauncher.launch(null)
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
@@ -165,6 +174,15 @@ fun ResumenScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // NUEVO ACCESO AL HISTORIAL DE COLABORACIONES
+
+        Button(
+            onClick = onMisColaboracionesClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("♡ Mis colaboraciones")
+        }
+
         Button(
             onClick = onVolverInicio,
             modifier = Modifier.fillMaxWidth()
@@ -181,52 +199,52 @@ fun ResumenScreen(
     }
 }
 
-        private fun guardarFoto(
-            context: Context,
-            bitmap: Bitmap
-        ): Boolean {
-            return try {
-                context.openFileOutput(
-                    ARCHIVO_FOTO_PERFIL,
-                    Context.MODE_PRIVATE
-                ).use { output ->
-                    bitmap.compress(
-                        Bitmap.CompressFormat.JPEG,
-                        90,
-                        output
-                    )
-                }
-            } catch (e: Exception) {
-                false
-            }
+private fun guardarFoto(
+    context: Context,
+    bitmap: Bitmap
+): Boolean {
+    return try {
+        context.openFileOutput(
+            ARCHIVO_FOTO_PERFIL,
+            Context.MODE_PRIVATE
+        ).use { output ->
+            bitmap.compress(
+                Bitmap.CompressFormat.JPEG,
+                90,
+                output
+            )
         }
+    } catch (e: Exception) {
+        false
+    }
+}
 
-        private fun cargarFoto(context: Context): Bitmap? {
-            return try {
-                val archivo = File(
-                    context.filesDir,
-                    ARCHIVO_FOTO_PERFIL
-                )
+private fun cargarFoto(context: Context): Bitmap? {
+    return try {
+        val archivo = File(
+            context.filesDir,
+            ARCHIVO_FOTO_PERFIL
+        )
 
-                if (archivo.exists()) {
-                    BitmapFactory.decodeFile(archivo.absolutePath)
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                null
-            }
+        if (archivo.exists()) {
+            BitmapFactory.decodeFile(archivo.absolutePath)
+        } else {
+            null
         }
+    } catch (e: Exception) {
+        null
+    }
+}
 
-        private fun eliminarFoto(context: Context): Boolean {
-            return try {
-                val archivo = File(
-                    context.filesDir,
-                    ARCHIVO_FOTO_PERFIL
-                )
+private fun eliminarFoto(context: Context): Boolean {
+    return try {
+        val archivo = File(
+            context.filesDir,
+            ARCHIVO_FOTO_PERFIL
+        )
 
-                !archivo.exists() || archivo.delete()
-            } catch (e: Exception) {
-                false
-            }
-        }
+        !archivo.exists() || archivo.delete()
+    } catch (e: Exception) {
+        false
+    }
+}

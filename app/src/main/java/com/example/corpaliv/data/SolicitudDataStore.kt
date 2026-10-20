@@ -20,30 +20,31 @@ class SolicitudDataStore(
     private val solicitudesKey =
         stringPreferencesKey("solicitudes_colaboracion")
 
-    suspend fun guardarSolicitud(
-        solicitud: SolicitudColaboracion
-    ) {
+    suspend fun guardarSolicitud(solicitud: SolicitudColaboracion) {
         context.solicitudesDataStore.edit { preferencias ->
-            val solicitudesActuales =
-                preferencias[solicitudesKey]?.let {
-                    JSONArray(it)
-                } ?: JSONArray()
+            val solicitudes = preferencias[solicitudesKey]?.let {
+                JSONArray(it)
+            } ?: JSONArray()
 
-            val nuevaSolicitud = JSONObject().apply {
-                put("id", solicitud.id)
-                put("nombre", solicitud.nombre)
-                put("correo", solicitud.correo)
-                put("edad", solicitud.edad)
-                put("fechaDisponibilidad", solicitud.fechaDisponibilidad)
-                put("motivo", solicitud.motivo)
-                put("aceptaContacto", solicitud.aceptaContacto)
-                put("disponibilidadRegular", solicitud.disponibilidadRegular)
-                put("recibirNovedades", solicitud.recibirNovedades)
-                put("rutaFotografia", solicitud.rutaFotografia)
-            }
+            solicitudes.put(solicitudAJson(solicitud))
+            preferencias[solicitudesKey] = solicitudes.toString()
+        }
+    }
 
-            solicitudesActuales.put(nuevaSolicitud)
-            preferencias[solicitudesKey] = solicitudesActuales.toString()
+    suspend fun obtenerSolicitudes(): List<SolicitudColaboracion> {
+        val preferencias = context.solicitudesDataStore.data.first()
+        val contenido = preferencias[solicitudesKey] ?: return emptyList()
+        return jsonALista(JSONArray(contenido))
+    }
+
+    suspend fun obtenerSolicitudesPorCorreo(
+        correo: String
+    ): List<SolicitudColaboracion> {
+        val correoNormalizado = correo.trim().lowercase()
+        if (correoNormalizado.isBlank()) return emptyList()
+
+        return obtenerSolicitudes().filter {
+            it.propietarioCorreo.trim().lowercase() == correoNormalizado
         }
     }
 
@@ -51,25 +52,65 @@ class SolicitudDataStore(
         var eliminada = false
 
         context.solicitudesDataStore.edit { preferencias ->
-            val contenido = preferencias[solicitudesKey] ?: return@edit
-            val solicitudesActuales = JSONArray(contenido)
-            val solicitudesActualizadas = JSONArray()
+            val contenido = preferencias[solicitudesKey]
+                ?: return@edit
 
-            for (indice in 0 until solicitudesActuales.length()) {
-                val solicitud = solicitudesActuales.getJSONObject(indice)
+            val actuales = JSONArray(contenido)
+            val actualizadas = JSONArray()
 
-                if (solicitud.getString("id") == id) {
+            for (i in 0 until actuales.length()) {
+                val elemento = actuales.getJSONObject(i)
+
+                if (elemento.optString("id") == id) {
                     eliminada = true
                 } else {
-                    solicitudesActualizadas.put(solicitud)
+                    actualizadas.put(elemento)
                 }
             }
 
-            preferencias[solicitudesKey] = solicitudesActualizadas.toString()
+            preferencias[solicitudesKey] = actualizadas.toString()
         }
 
         return eliminada
     }
+
+    suspend fun eliminarSolicitudPropia(
+        id: String,
+        correoPropietario: String
+    ): Boolean {
+        val correoNormalizado = correoPropietario.trim().lowercase()
+        if (correoNormalizado.isBlank()) return false
+
+        var eliminada = false
+
+        context.solicitudesDataStore.edit { preferencias ->
+            val contenido = preferencias[solicitudesKey]
+                ?: return@edit
+
+            val actuales = JSONArray(contenido)
+            val actualizadas = JSONArray()
+
+            for (i in 0 until actuales.length()) {
+                val elemento = actuales.getJSONObject(i)
+                val mismoId = elemento.optString("id") == id
+                val mismoPropietario =
+                    elemento.optString("propietarioCorreo")
+                        .trim()
+                        .lowercase() == correoNormalizado
+
+                if (mismoId && mismoPropietario) {
+                    eliminada = true
+                } else {
+                    actualizadas.put(elemento)
+                }
+            }
+
+            preferencias[solicitudesKey] = actualizadas.toString()
+        }
+
+        return eliminada
+    }
+
     suspend fun actualizarSolicitud(
         solicitudActualizada: SolicitudColaboracion
     ): Boolean {
@@ -79,62 +120,48 @@ class SolicitudDataStore(
             val contenido = preferencias[solicitudesKey]
                 ?: return@edit
 
-            val solicitudesActuales = JSONArray(contenido)
-            val solicitudesActualizadas = JSONArray()
+            val actuales = JSONArray(contenido)
+            val nuevas = JSONArray()
 
-            for (indice in 0 until solicitudesActuales.length()) {
-                val elemento = solicitudesActuales.getJSONObject(indice)
+            for (i in 0 until actuales.length()) {
+                val elemento = actuales.getJSONObject(i)
 
-                if (elemento.getString("id") == solicitudActualizada.id) {
-                    val objetoActualizado = JSONObject().apply {
-                        put("id", solicitudActualizada.id)
-                        put("nombre", solicitudActualizada.nombre)
-                        put("correo", solicitudActualizada.correo)
-                        put("edad", solicitudActualizada.edad)
-                        put(
-                            "fechaDisponibilidad",
-                            solicitudActualizada.fechaDisponibilidad
-                        )
-                        put("motivo", solicitudActualizada.motivo)
-                        put("aceptaContacto", solicitudActualizada.aceptaContacto)
-                        put(
-                            "disponibilidadRegular",
-                            solicitudActualizada.disponibilidadRegular
-                        )
-                        put(
-                            "recibirNovedades",
-                            solicitudActualizada.recibirNovedades
-                        )
-                        put(
-                            "rutaFotografia",
-                            solicitudActualizada.rutaFotografia
-                        )
-                    }
-
-                    solicitudesActualizadas.put(objetoActualizado)
+                if (elemento.optString("id") == solicitudActualizada.id) {
+                    nuevas.put(solicitudAJson(solicitudActualizada))
                     actualizada = true
                 } else {
-                    solicitudesActualizadas.put(elemento)
+                    nuevas.put(elemento)
                 }
             }
 
             if (actualizada) {
-                preferencias[solicitudesKey] =
-                    solicitudesActualizadas.toString()
+                preferencias[solicitudesKey] = nuevas.toString()
             }
         }
 
         return actualizada
     }
 
+    private fun solicitudAJson(
+        solicitud: SolicitudColaboracion
+    ) = JSONObject().apply {
+        put("id", solicitud.id)
+        put("nombre", solicitud.nombre)
+        put("correo", solicitud.correo)
+        put("telefono", solicitud.telefono)
+        put("edad", solicitud.edad)
+        put("fechaDisponibilidad", solicitud.fechaDisponibilidad)
+        put("motivo", solicitud.motivo)
+        put("aceptaContacto", solicitud.aceptaContacto)
+        put("disponibilidadRegular", solicitud.disponibilidadRegular)
+        put("recibirNovedades", solicitud.recibirNovedades)
+        put("rutaFotografia", solicitud.rutaFotografia)
+        put("propietarioCorreo", solicitud.propietarioCorreo)
+    }
 
-    suspend fun obtenerSolicitudes(): List<SolicitudColaboracion> {
-        val preferencias = context.solicitudesDataStore.data.first()
-        val contenido = preferencias[solicitudesKey]
-            ?: return emptyList()
-
-        val json = JSONArray(contenido)
-
+    private fun jsonALista(
+        json: JSONArray
+    ): List<SolicitudColaboracion> {
         return List(json.length()) { indice ->
             val elemento = json.getJSONObject(indice)
 
@@ -142,15 +169,22 @@ class SolicitudDataStore(
                 id = elemento.getString("id"),
                 nombre = elemento.getString("nombre"),
                 correo = elemento.getString("correo"),
+                telefono = elemento.optString("telefono", ""),
                 edad = elemento.getInt("edad"),
-                fechaDisponibilidad = elemento.getString("fechaDisponibilidad"),
+                fechaDisponibilidad =
+                    elemento.getString("fechaDisponibilidad"),
                 motivo = elemento.getString("motivo"),
                 aceptaContacto = elemento.getBoolean("aceptaContacto"),
-                disponibilidadRegular = elemento.getBoolean("disponibilidadRegular"),
-                recibirNovedades = elemento.getBoolean("recibirNovedades"),
-                rutaFotografia = elemento
-                    .optString("rutaFotografia", "")
-                    .takeIf { it.isNotBlank() && it != "null" }
+                disponibilidadRegular =
+                    elemento.getBoolean("disponibilidadRegular"),
+                recibirNovedades =
+                    elemento.getBoolean("recibirNovedades"),
+                rutaFotografia = elemento.optString(
+                    "rutaFotografia",
+                    ""
+                ).takeIf { it.isNotBlank() && it != "null" },
+                propietarioCorreo =
+                    elemento.optString("propietarioCorreo", "")
             )
         }
     }

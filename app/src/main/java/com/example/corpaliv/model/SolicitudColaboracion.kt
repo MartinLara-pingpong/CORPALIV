@@ -11,5 +11,7 @@ data class SolicitudColaboracion(
     val aceptaContacto: Boolean,
     val disponibilidadRegular: Boolean,
     val recibirNovedades: Boolean,
-    val rutaFotografia: String? = null
+    val rutaFotografia: String? = null,
+    val telefono: String = "",
+    val propietarioCorreo: String = ""
 )

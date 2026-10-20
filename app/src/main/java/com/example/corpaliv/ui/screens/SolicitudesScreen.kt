@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,14 +26,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -52,10 +47,6 @@ fun SolicitudesScreen(
     onVolverClick: () -> Unit
 ) {
     val estado by solicitudViewModel.uiState.collectAsState()
-
-    var solicitudPendienteEliminar by remember {
-        mutableStateOf<SolicitudColaboracion?>(null)
-    }
 
     LaunchedEffect(solicitudViewModel) {
         solicitudViewModel.cargarSolicitudes()
@@ -277,12 +268,7 @@ fun SolicitudesScreen(
                 items = estado.solicitudes,
                 key = { solicitud -> solicitud.id }
             ) { solicitud ->
-                SolicitudCard(
-                    solicitud = solicitud,
-                    onEliminarClick = {
-                        solicitudPendienteEliminar = solicitud
-                    }
-                )
+                SolicitudCard(solicitud = solicitud)
             }
         }
 
@@ -295,57 +281,11 @@ fun SolicitudesScreen(
             }
         }
     }
-
-    if (solicitudPendienteEliminar != null) {
-        AlertDialog(
-            onDismissRequest = {
-                solicitudPendienteEliminar = null
-            },
-            title = {
-                Text("¿Eliminar solicitud?")
-            },
-            text = {
-                Text(
-                    "Se eliminará la solicitud de " +
-                            "${solicitudPendienteEliminar?.nombre}. " +
-                            "Esta acción no se puede deshacer."
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val solicitud = solicitudPendienteEliminar
-
-                        if (solicitud != null) {
-                            solicitudViewModel.eliminarSolicitud(solicitud.id)
-                        }
-
-                        solicitudPendienteEliminar = null
-                    }
-                ) {
-                    Text(
-                        text = "Eliminar",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        solicitudPendienteEliminar = null
-                    }
-                ) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
 }
 
 @Composable
 private fun SolicitudCard(
-    solicitud: SolicitudColaboracion,
-    onEliminarClick: () -> Unit
+    solicitud: SolicitudColaboracion
 ) {
     val context = LocalContext.current
 
@@ -469,6 +409,13 @@ private fun SolicitudCard(
                 valor = solicitud.aceptaContacto
             )
 
+            if (solicitud.aceptaContacto) {
+                DatoSolicitud(
+                    etiqueta = "Teléfono",
+                    valor = solicitud.telefono
+                )
+            }
+
             PreferenciaSolicitud(
                 etiqueta = "Disponibilidad regular",
                 valor = solicitud.disponibilidadRegular
@@ -478,16 +425,6 @@ private fun SolicitudCard(
                 etiqueta = "Recibir novedades",
                 valor = solicitud.recibirNovedades
             )
-
-            OutlinedButton(
-                onClick = onEliminarClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Eliminar solicitud",
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
         }
     }
 }
