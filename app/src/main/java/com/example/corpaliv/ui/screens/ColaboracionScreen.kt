@@ -1,6 +1,12 @@
 
 package com.example.corpaliv.ui.screens
 
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import com.example.corpaliv.ui.components.FechaPickerDialog
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -64,7 +70,9 @@ import com.example.corpaliv.model.SolicitudColaboracion
 import com.example.corpaliv.ui.viewmodel.SolicitudViewModel
 import com.example.corpaliv.ui.viewmodel.UsuarioViewModel
 import java.util.UUID
-
+import com.example.corpaliv.ui.components.FechaPickerDialog
+import com.example.corpaliv.ui.components.IconoError
+import com.example.corpaliv.ui.components.rememberAbrirCamara
 private val ColAzul = Color(0xFF102C50)
 private val ColAzulMedio = Color(0xFF245B91)
 private val ColVerde = Color(0xFF35A879)
@@ -81,6 +89,7 @@ fun ColaboracionScreen(
     val uiState by solicitudViewModel.uiState.collectAsState()
     val formulario by solicitudViewModel.formularioState.collectAsState()
     val usuarioState by usuarioViewModel.uiState.collectAsState()
+    var mostrarDatePicker by remember { mutableStateOf(false) }
 
     var donacionSeleccionada by remember {
         mutableIntStateOf(10000)
@@ -97,17 +106,17 @@ fun ColaboracionScreen(
     val cantidadDonacion =
         donacionPersonalizada.toIntOrNull() ?: donacionSeleccionada
 
-    val camaraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        if (bitmap != null) {
-            solicitudViewModel.actualizarFotografia(bitmap)
-        } else {
+    val abrirCamara = rememberAbrirCamara(
+        onFoto = { bitmap ->
+            if (bitmap != null) solicitudViewModel.actualizarFotografia(bitmap)
+            else solicitudViewModel.actualizarErrorFotografia("No se capturó ninguna fotografía.")
+        },
+        onPermisoDenegado = {
             solicitudViewModel.actualizarErrorFotografia(
-                "No se capturó ninguna fotografía."
+                "Permiso de cámara denegado. Puedes activarlo en Ajustes."
             )
         }
-    }
+    )
 
     LaunchedEffect(solicitudViewModel) {
         solicitudViewModel.cargarSolicitudes()
@@ -486,14 +495,19 @@ fun ColaboracionScreen(
                         shape = RoundedCornerShape(14.dp),
                         singleLine = true
                     )
-
                     OutlinedTextField(
                         value = formulario.fecha,
-                        onValueChange = solicitudViewModel::actualizarFecha,
-                        label = { Text("Disponibilidad") },
+                        onValueChange = {},               // no se escribe a mano
+                        readOnly = true,
+                        label = { Text("Fecha de disponibilidad") },
                         leadingIcon = { Text("📅") },
-                        placeholder = { Text("Ej.: fines de semana") },
+                        placeholder = { Text("dd/MM/yyyy") },
                         isError = formulario.errores.fecha != null,
+                        trailingIcon = {
+                            IconButton(onClick = { mostrarDatePicker = true }) {
+                                Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                            }
+                        },
                         supportingText = {
                             formulario.errores.fecha?.let { Text(it) }
                         },
@@ -502,12 +516,19 @@ fun ColaboracionScreen(
                         singleLine = true
                     )
 
+                    if (mostrarDatePicker) {
+                        FechaPickerDialog(
+                            onFechaSeleccionada = solicitudViewModel::actualizarFecha,
+                            onDismiss = { mostrarDatePicker = false }
+                        )
+                    }
+
                     OutlinedTextField(
                         value = formulario.motivo,
                         onValueChange = solicitudViewModel::actualizarMotivo,
-                        label = { Text("¿Cómo te gustaría colaborar?") },
+                        label = { Text("¿Porque decidiste colaborar?") },
                         placeholder = {
-                            Text("Cuéntanos cómo te gustaría ayudar")
+                            Text("")
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -568,7 +589,7 @@ fun ColaboracionScreen(
                     }
 
                     OutlinedButton(
-                        onClick = { camaraLauncher.launch(null) },
+                        onClick = { abrirCamara() },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp)
                     ) {

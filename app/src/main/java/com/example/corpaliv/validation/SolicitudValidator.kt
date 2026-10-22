@@ -59,12 +59,11 @@ object SolicitudValidator {
             },
 
             // Este campo es disponibilidad, no una fecha concreta.
-            fecha = if (fecha.isBlank()) {
-                "Indica cuándo tienes disponibilidad para colaborar."
-            } else {
-                null
+            fecha = when {
+                fecha.isBlank() -> "Selecciona una fecha de disponibilidad."
+                !fechaValida(fecha) -> "La fecha no es válida."
+                else -> null
             },
-
             motivo = if (motivo.isBlank()) {
                 "Cuéntanos cómo te gustaría colaborar."
             } else {
@@ -74,5 +73,22 @@ object SolicitudValidator {
             // Aceptar el contacto es opcional.
             aceptaContacto = null
         )
+
+    }
+    private fun fechaValida(texto: String): Boolean {
+        return try {
+            val formato = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale("es", "CL"))
+            formato.isLenient = false
+            val fecha = formato.parse(texto) ?: return false
+            val hoy = java.util.Calendar.getInstance().apply {
+                set(java.util.Calendar.HOUR_OF_DAY, 0)
+                set(java.util.Calendar.MINUTE, 0)
+                set(java.util.Calendar.SECOND, 0)
+                set(java.util.Calendar.MILLISECOND, 0)
+            }.time
+            !fecha.before(hoy)
+        } catch (e: Exception) {
+            false
+        }
     }
 }

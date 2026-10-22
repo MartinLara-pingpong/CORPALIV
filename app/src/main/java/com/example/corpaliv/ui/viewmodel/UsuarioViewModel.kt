@@ -33,17 +33,7 @@ class UsuarioViewModel(
     val errores: StateFlow<UsuarioErrores> = _errores.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            usuarioRepository.usuario.collect { usuario ->
-                _uiState.update { estado ->
-                    estado.copy(
-                        nombre = usuario.nombre,
-                        correo = usuario.correo,
-                        direccion = usuario.direccion
-                    )
-                }
-            }
-        }
+
     }
 
     fun actualizarNombre(nombre: String) {

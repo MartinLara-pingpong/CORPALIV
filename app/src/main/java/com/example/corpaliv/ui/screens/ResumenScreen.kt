@@ -42,7 +42,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-
+import com.example.corpaliv.ui.components.FechaPickerDialog
+import com.example.corpaliv.ui.components.IconoError
+import com.example.corpaliv.ui.components.rememberAbrirCamara
 private const val ARCHIVO_FOTO_PERFIL = "foto_perfil.jpg"
 
 @Composable
@@ -73,24 +75,24 @@ fun ResumenScreen(
         cargandoFoto = false
     }
 
-    val camaraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        if (bitmap != null) {
-            scope.launch {
-                val guardada = withContext(Dispatchers.IO) {
-                    guardarFoto(context, bitmap)
-                }
-
-                if (guardada) {
-                    fotoPerfil = bitmap
-                    mensajeFoto = "Foto de perfil guardada correctamente."
-                } else {
-                    mensajeFoto = "No se pudo guardar la foto."
+    val abrirCamara = rememberAbrirCamara(
+        onFoto = { bitmap ->
+            if (bitmap != null) {
+                scope.launch {
+                    val guardada = withContext(Dispatchers.IO) { guardarFoto(context, bitmap) }
+                    if (guardada) {
+                        fotoPerfil = bitmap
+                        mensajeFoto = "Foto de perfil guardada correctamente."
+                    } else {
+                        mensajeFoto = "No se pudo guardar la foto."
+                    }
                 }
             }
+        },
+        onPermisoDenegado = {
+            mensajeFoto = "Permiso de cámara denegado. Puedes activarlo en Ajustes."
         }
-    }
+    )
 
     Column(
         modifier = Modifier
@@ -122,7 +124,7 @@ fun ResumenScreen(
 
         Button(
             onClick = {
-                camaraLauncher.launch(null)
+                abrirCamara()
             },
             modifier = Modifier.fillMaxWidth()
         ) {
