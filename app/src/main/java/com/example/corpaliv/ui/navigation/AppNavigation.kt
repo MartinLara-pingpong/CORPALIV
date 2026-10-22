@@ -42,9 +42,9 @@ fun AppNavigation(navController: NavHostController) {
                 },
                 onSeccionClick = { seccion ->
                     navController.navigate(seccion)
-                }
-            )
-        }
+                },
+                usuarioViewModel = usuarioViewModel
+            )}
 
         // Registro de usuarios
         composable("registro") {
@@ -101,7 +101,9 @@ fun AppNavigation(navController: NavHostController) {
                     }
                 },
                 onCerrarSesion = {
-                    navController.navigate("login") {
+                    usuarioViewModel.cerrarSesion()
+
+                    navController.navigate("inicio") {
                         popUpTo("inicio") {
                             inclusive = false
                         }
@@ -131,7 +133,9 @@ fun AppNavigation(navController: NavHostController) {
                 },
                 onVerSolicitudesClick = {
                     navController.navigate("solicitudes")
-                }
+                },
+                usuarioViewModel = usuarioViewModel,
+                solicitudViewModel = solicitudViewModel
             )
         }
 

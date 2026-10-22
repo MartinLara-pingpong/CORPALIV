@@ -247,32 +247,6 @@ class SolicitudViewModel(
         _formularioState.value = SolicitudFormularioState()
     }
 
-    fun validarSolicitud(
-        nombre: String,
-        correo: String,
-        edad: String,
-        fecha: String,
-        motivo: String,
-        aceptaContacto: Boolean
-    ): SolicitudErrores {
-        val resultado = SolicitudValidator.validar(
-            nombre = nombre,
-            correo = correo,
-            edad = edad,
-            fecha = fecha,
-            motivo = motivo,
-            aceptaContacto = aceptaContacto
-        )
-
-        return SolicitudErrores(
-            nombre = resultado.nombre,
-            correo = resultado.correo,
-            edad = resultado.edad,
-            fecha = resultado.fecha,
-            motivo = resultado.motivo,
-            contacto = resultado.aceptaContacto
-        )
-    }
 
     fun guardarSolicitud(solicitud: SolicitudColaboracion) {
         if (_uiState.value.enviando) return

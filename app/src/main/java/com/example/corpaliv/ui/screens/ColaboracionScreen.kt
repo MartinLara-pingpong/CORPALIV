@@ -1,4 +1,3 @@
-
 package com.example.corpaliv.ui.screens
 
 
@@ -955,4 +954,5 @@ private fun PreferenciaColaboracion(
             )
         }
     }
+
 }

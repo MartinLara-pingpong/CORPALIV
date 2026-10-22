@@ -48,7 +48,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-
+import androidx.compose.runtime.collectAsState
+import com.example.corpaliv.ui.viewmodel.UsuarioViewModel
 private val HomeAzul = Color(0xFF102C50)
 private val HomeAzulMedio = Color(0xFF245B91)
 private val HomeVerde = Color(0xFF35A879)
@@ -68,10 +69,12 @@ fun HomeScreen(
     onRegistroClick: () -> Unit,
     onLoginClick: () -> Unit,
     onColaborarClick: () -> Unit,
-    onSeccionClick: (String) -> Unit
+    onSeccionClick: (String) -> Unit,
+    usuarioViewModel: UsuarioViewModel
 ) {
     val context = LocalContext.current
-
+    val usuarioActual by usuarioViewModel.usuarioActual.collectAsState()
+    val sesionIniciada = usuarioActual != null
     var mostrarContenido by remember { mutableStateOf(false) }
     var busqueda by remember { mutableStateOf("") }
     var mostrarAccesibilidad by remember { mutableStateOf(false) }
@@ -181,16 +184,22 @@ fun HomeScreen(
                     }
 
                     OutlinedButton(
-                        onClick = onLoginClick,
+                        onClick = {
+                            if (sesionIniciada) {
+                                onSeccionClick("resumen")
+                            } else {
+                                onLoginClick()
+                            }
+                        },
                         shape = RoundedCornerShape(13.dp)
                     ) {
                         Text(
-                            text = "Entrar",
+                            text = if (sesionIniciada) "Perfil" else "Entrar",
                             color = HomeAzul,
                             fontSize = 12.sp * escalaTexto
                         )
                     }
-                }
+                    }
             }
         }
 

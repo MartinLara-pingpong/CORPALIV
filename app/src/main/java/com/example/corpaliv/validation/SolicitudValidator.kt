@@ -1,4 +1,3 @@
-
 package com.example.corpaliv.validation
 
 import android.util.Patterns
@@ -21,6 +20,16 @@ data class ResultadoValidacionSolicitud(
 }
 
 object SolicitudValidator {
+
+    const val MOTIVO_MINIMO = 10
+
+    // Regla del motivo reutilizada por el formulario y por la edición.
+    fun validarMotivo(motivo: String): String? = when {
+        motivo.isBlank() -> "Cuéntanos cómo te gustaría colaborar."
+        motivo.trim().length < MOTIVO_MINIMO ->
+            "El motivo debe tener al menos $MOTIVO_MINIMO caracteres."
+        else -> null
+    }
 
     fun validar(
         nombre: String,
@@ -64,11 +73,7 @@ object SolicitudValidator {
                 !fechaValida(fecha) -> "La fecha no es válida."
                 else -> null
             },
-            motivo = if (motivo.isBlank()) {
-                "Cuéntanos cómo te gustaría colaborar."
-            } else {
-                null
-            },
+            motivo = validarMotivo(motivo),
 
             // Aceptar el contacto es opcional.
             aceptaContacto = null

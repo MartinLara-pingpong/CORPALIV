@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.example.corpaliv.data.UsuarioGuardado
+import kotlinx.coroutines.flow.first
 
 class UsuarioViewModel(
     application: Application
@@ -31,9 +33,28 @@ class UsuarioViewModel(
 
     private val _errores = MutableStateFlow(UsuarioErrores())
     val errores: StateFlow<UsuarioErrores> = _errores.asStateFlow()
+    private val _usuarioActual = MutableStateFlow<UsuarioGuardado?>(null)
+    val usuarioActual: StateFlow<UsuarioGuardado?> = _usuarioActual.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            usuarioRepository.usuario.collect { usuario ->
+                _uiState.update {
+                    it.copy(
+                        nombre = usuario.nombre,
+                        correo = usuario.correo,
+                        direccion = usuario.direccion
+                    )
+                }
 
+                if (_usuarioActual.value != null) {
+                    _usuarioActual.value = usuario
+                }
+            }
+        }
+    }
+    fun cerrarSesion() {
+        _usuarioActual.value = null
     }
 
     fun actualizarNombre(nombre: String) {
@@ -159,12 +180,26 @@ class UsuarioViewModel(
                     )
                 }
 
-                resultado(valido)
+                if (valido) {
+                    val usuario = withContext(Dispatchers.IO) {
+                        usuarioRepository.usuario.first()
+                    }
+
+                    if (usuario.correo.equals(correo.trim(), ignoreCase = true)) {
+                        _usuarioActual.value = usuario
+                        resultado(true)
+                    } else {
+                        resultado(false)
+                    }
+                } else {
+                    resultado(false)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 resultado(false)
             }
         }
+
     }
 }

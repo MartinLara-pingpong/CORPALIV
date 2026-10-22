@@ -43,17 +43,7 @@ class UsuarioDataStore(
             )
         }
 
-    suspend fun guardarUsuario(
-        nombre: String,
-        correo: String,
-        direccion: String
-    ) {
-        context.usuarioDataStore.edit { preferencias ->
-            preferencias[Keys.NOMBRE] = nombre
-            preferencias[Keys.CORREO] = correo.trim().lowercase()
-            preferencias[Keys.DIRECCION] = direccion
-        }
-    }
+
 
     suspend fun registrarCuenta(
         nombre: String,
@@ -108,16 +98,6 @@ class UsuarioDataStore(
             hashEsperado,
             hashIntroducido
         )
-    }
-
-    suspend fun borrarUsuario() {
-        context.usuarioDataStore.edit { preferencias ->
-            preferencias.remove(Keys.NOMBRE)
-            preferencias.remove(Keys.CORREO)
-            preferencias.remove(Keys.DIRECCION)
-            preferencias.remove(Keys.SAL)
-            preferencias.remove(Keys.HASH)
-        }
     }
 
     private fun generarHash(

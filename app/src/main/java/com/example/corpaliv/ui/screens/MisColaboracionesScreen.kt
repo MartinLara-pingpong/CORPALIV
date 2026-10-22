@@ -1,4 +1,3 @@
-
 package com.example.corpaliv.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +18,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.corpaliv.model.SolicitudColaboracion
+import com.example.corpaliv.validation.SolicitudValidator
 import com.example.corpaliv.ui.viewmodel.SolicitudViewModel
 import com.example.corpaliv.ui.viewmodel.UsuarioViewModel
 
@@ -47,6 +48,10 @@ fun MisColaboracionesScreen(
     var solicitudEliminar by remember {
         mutableStateOf<SolicitudColaboracion?>(null)
     }
+    var solicitudEditando by remember {
+        mutableStateOf<SolicitudColaboracion?>(null)
+    }
+    var motivoEditado by remember { mutableStateOf("") }
 
     val correoUsuario = usuario.correo.trim().lowercase()
 
@@ -202,6 +207,16 @@ fun MisColaboracionesScreen(
 
                                 OutlinedButton(
                                     onClick = {
+                                        solicitudEditando = solicitud
+                                        motivoEditado = solicitud.motivo
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Editar motivo")
+                                }
+
+                                OutlinedButton(
+                                    onClick = {
                                         solicitudEliminar = solicitud
                                     },
                                     modifier = Modifier.fillMaxWidth()
@@ -259,6 +274,53 @@ fun MisColaboracionesScreen(
                 TextButton(
                     onClick = {
                         solicitudEliminar = null
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    solicitudEditando?.let { original ->
+        val errorMotivo = SolicitudValidator.validarMotivo(motivoEditado)
+
+        AlertDialog(
+            onDismissRequest = {
+                solicitudEditando = null
+            },
+            title = {
+                Text("Editar motivo")
+            },
+            text = {
+                OutlinedTextField(
+                    value = motivoEditado,
+                    onValueChange = { motivoEditado = it },
+                    label = { Text("Motivo de colaboración") },
+                    isError = errorMotivo != null,
+                    supportingText = {
+                        errorMotivo?.let { Text(it) }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = errorMotivo == null,
+                    onClick = {
+                        solicitudViewModel.actualizarSolicitud(
+                            original.copy(motivo = motivoEditado.trim())
+                        )
+                        solicitudEditando = null
+                    }
+                ) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        solicitudEditando = null
                     }
                 ) {
                     Text("Cancelar")
