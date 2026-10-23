@@ -9,16 +9,7 @@ data class ResultadoValidacionSolicitud(
     val fecha: String? = null,
     val motivo: String? = null,
     val aceptaContacto: String? = null
-) {
-    val esValido: Boolean
-        get() = nombre == null &&
-                correo == null &&
-                edad == null &&
-                fecha == null &&
-                motivo == null &&
-                aceptaContacto == null
-}
-
+)
 object SolicitudValidator {
 
     const val MOTIVO_MINIMO = 10
@@ -36,8 +27,7 @@ object SolicitudValidator {
         correo: String,
         edad: String,
         fecha: String,
-        motivo: String,
-        aceptaContacto: Boolean
+        motivo: String
     ): ResultadoValidacionSolicitud {
 
         val edadNumero = edad.toIntOrNull()
