@@ -27,7 +27,8 @@ object SolicitudValidator {
         correo: String,
         edad: String,
         fecha: String,
-        motivo: String
+        motivo: String,
+        aceptaContacto: Boolean
     ): ResultadoValidacionSolicitud {
 
         val edadNumero = edad.toIntOrNull()
